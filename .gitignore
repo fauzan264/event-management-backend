@@ -9,3 +9,6 @@ node_modules/
 # IDE/editor-specific files
 .vscode/
 /src/generated/prisma
+
+# Build artifacts
+dist/
