@@ -16,19 +16,35 @@ datasource db {
 }
 
 model User {
-  id             String    @id @default(uuid())
-  idCardNumber   String    @unique @map("id_card_number")
-  fullName       String    @map("fullname")
-  dateOfBirth    DateTime  @map("date_of_birth")
-  email          String
-  password       String
-  phoneNumber    String    @map("phone_number")
-  referralCode   String?   @map("referral_code")
-  totalUserPoint Int       @map("total_user_point")
-  profilePicture String?   @map("profile_picture")
-  createdAt      DateTime  @default(now()) @map("created_at")
-  updatedAt      DateTime  @updatedAt @map("updated_at")
-  deletedAt      DateTime? @map("deleted_at")
+  id             String   @id @default(uuid()) @db.VarChar(36)
+  idCardNumber   String   @unique @map("id_card_number") @db.VarChar(100)
+  fullName       String   @map("fullname") @db.VarChar(100)
+  dateOfBirth    DateTime @map("date_of_birth")
+  email          String   @db.VarChar(100)
+  password       String   @db.VarChar(100)
+  phoneNumber    String   @map("phone_number") @db.VarChar(15)
+  referralCode   String?  @map("referral_code") @db.VarChar(20)
+  totalUserPoint Int      @map("total_user_point")
+  profilePicture String?  @map("profile_picture") @db.VarChar(100)
+
+  user_points UserPoint[]
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
 
   @@map("users")
+}
+
+model UserPoint {
+  id        String    @id @default(uuid()) @db.VarChar(36)
+  userId    String?   @map("user_id") @db.VarChar(36)
+  users     User?     @relation(fields: [userId], references: [id])
+  points    Int
+  expiredAt DateTime  @map("expired_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  @@map("user_points")
 }
