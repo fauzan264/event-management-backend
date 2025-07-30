@@ -1,6 +1,6 @@
 import { jwtSign } from '../lib/jwt.sign'
 import { prisma } from '../db/connection'
-import { User } from '../generated/prisma'
+import { User, UserRole } from '../generated/prisma'
 import bcrypt from 'bcrypt'
 import { DateTime } from 'luxon'
 import { generateCode } from '../utils/generate.code'
@@ -15,7 +15,8 @@ export const authRegisterService = async ({
   email,
   password,
   phoneNumber,
-  referralCode
+  referralCode,
+  userRole
 }: Omit<User, 'id' | 'profilePicture' | 'totalUserPoint' | 'createdAt'| 'updatedAt' | 'deletedAt'>) => {
   return await prisma.$transaction(async(tx) => {
     
@@ -48,7 +49,8 @@ export const authRegisterService = async ({
         email,
         password: hashedPassword,
         phoneNumber,
-        totalUserPoint
+        totalUserPoint,
+        userRole
       }
     })
   
@@ -76,6 +78,16 @@ export const authRegisterService = async ({
           userId: referral?.id,
           points: rewardPoint,
           expiredAt: threeMonthLater.toISO()!,
+        }
+      })
+    }
+
+    if (userRole == UserRole.EVENT_ORGANIZER) {
+      await tx.eventOrganizer.create({
+        data: {
+          companyName: `${fullName} company`,
+          email: email,
+          userId: createdUser.id
         }
       })
     }
