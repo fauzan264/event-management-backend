@@ -1,5 +1,5 @@
 import { Request, Response } from "express"
-import { authGenenerateCodeReferralService, authLoginService, authRegisterService } from "../services/auth.service"
+import { authGenenerateCodeReferralService, authLoginService, authRegisterService, authRequestResetPasswordService, authResetPasswordService } from "../services/auth.service"
 
 export const authRegisterController = async (req: Request, res: Response) => {
   const {
@@ -54,3 +54,27 @@ export const authGenenerateCodeReferralController = async (req: Request, res: Re
     data: { referral_code: referralCode }
   })
 }
+
+export const authRequestResetPasswordController = async (req: Request, res: Response) => {
+  const { email } = req.body
+
+  await authRequestResetPasswordService({email})
+
+  res.status(200).json({
+    success: true,
+    message: "Password reset link has been sent to your email address."
+  })
+}
+
+export const authResetPasswordController = async (req: Request, res: Response) => {
+  const { password } = req.body
+  const { userId } = res.locals.payload
+
+  await authResetPasswordService({ id: userId, password })
+
+  res.status(200).json({
+    success: true,
+    message: 'Password updated successfully'
+  })
+}
+
