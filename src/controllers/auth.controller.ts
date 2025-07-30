@@ -1,5 +1,5 @@
 import { Request, Response } from "express"
-import { authRegisterService } from "../services/auth.service"
+import { authLoginService, authRegisterService } from "../services/auth.service"
 
 export const authRegisterController = async (req: Request, res: Response) => {
   const {
@@ -29,5 +29,17 @@ export const authRegisterController = async (req: Request, res: Response) => {
       fullname,
       email
     }
+  })
+}
+
+export const authLoginController = async (req: Request, res: Response) => {
+  const { email, password } = req.body
+
+  const { token, fullName } = await authLoginService({ email, password })
+
+  res.status(200).json({
+    success: true,
+    message: `Login user successful`,
+    data: { token, full_name: fullName }
   })
 }

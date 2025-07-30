@@ -78,3 +78,23 @@ export const authRegisterService = async ({
   })
 
 }
+
+export const authLoginService = async ({email, password}: Pick<User, 'email' | 'password'>) => {
+  const findUserByEmail = await prisma.user.findFirst({
+    where: { email }
+  })
+
+  if (!findUserByEmail) throw { message: 'Email is not register', isExpose: true }
+
+  const comparePassword = await bcrypt.compare(password, findUserByEmail?.password)
+
+  if (!comparePassword) throw { message: 'Password not valid', isExpose: true }
+
+  const token = await jwtSign(
+    { userId: findUserByEmail?.id },
+    process.env.JWT_SECRET_KEY!,
+    { algorithm: 'HS256' }
+  )
+
+  return { token, fullName: findUserByEmail?.fullName }
+}
