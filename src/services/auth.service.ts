@@ -3,6 +3,7 @@ import { prisma } from '../db/connection'
 import { User } from '../generated/prisma'
 import bcrypt from 'bcrypt'
 import { DateTime } from 'luxon'
+import { generateCode } from '../utils/generate.code'
 
 export const authRegisterService = async ({
   idCardNumber,
@@ -97,4 +98,27 @@ export const authLoginService = async ({email, password}: Pick<User, 'email' | '
   )
 
   return { token, fullName: findUserByEmail?.fullName }
+}
+
+export const authGenenerateCodeReferralService = async ({ id }: Pick<User, 'id'>) => {
+  const findUserById = await prisma.user.findFirst({
+    where: { id }
+  })
+
+  if (!findUserById)
+    throw { message: `User with id = ${id} is not found`, isExpose: true }
+
+  if (findUserById.referralCode)
+    throw { message: `Referral code already exists and cannot be regenerated.`, isExpose: true }
+  
+  const createReferralCode = await prisma.user.update({
+    data: {
+      referralCode: generateCode("REF-")
+    },
+    where: {
+      id
+    }
+  })
+
+  return createReferralCode.referralCode
 }
