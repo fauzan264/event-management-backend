@@ -4,6 +4,9 @@ import { User } from '../generated/prisma'
 import bcrypt from 'bcrypt'
 import { DateTime } from 'luxon'
 import { generateCode } from '../utils/generate.code'
+import fs from 'fs'
+import Handlebars from 'handlebars'
+import { transporter } from '../lib/transporter'
 
 export const authRegisterService = async ({
   idCardNumber,
@@ -121,4 +124,48 @@ export const authGenenerateCodeReferralService = async ({ id }: Pick<User, 'id'>
   })
 
   return createReferralCode.referralCode
+}
+
+export const authRequestResetPasswordService = async ({email}: Pick<User, 'email'>) => {
+  const checkUserByEmail = await prisma.user.findFirst({
+    where: {
+      email: email
+    }
+  })
+  
+  if (!checkUserByEmail) throw { message: `User with email '${email}' is not registered`, isExpose: true }
+
+  const token = await jwtSign(
+    { userId: checkUserByEmail?.id },
+    process.env.JWT_SECRET_KEY!,
+    { algorithm: 'HS256' }
+  )
+
+  const templateHtml = fs.readFileSync('src/public/template.html', 'utf-8')
+  const compiledTemplateHtml = Handlebars.compile(templateHtml)
+
+  const resultTemplateHtml = compiledTemplateHtml({
+    fullname: checkUserByEmail.fullName,
+    resetLinkPassword: `${process.env.LINK_RESET_PASSWORD}/${token}`
+  })
+
+  await transporter.sendMail({
+    to: email,
+    subject: 'Reset your Event Management password',
+    html: resultTemplateHtml
+  })
+}
+
+export const authResetPasswordService = async ({id, password}: Pick<User, 'id' | 'password'>) => {
+  const findUserById = await prisma.user.findUnique({ where: { id } }) 
+
+  if (!findUserById)
+    throw { message: `User with id = ${id} is not found`, isExpose: true }
+
+  const hashedPassword = await bcrypt.hash(password, 10)
+
+  await prisma.user.update({
+    data: { password: hashedPassword },
+    where: { id }
+  })
 }
