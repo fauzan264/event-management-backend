@@ -9,7 +9,8 @@ export const authRegisterController = async (req: Request, res: Response) => {
     email,
     password,
     phone_number,
-    referral_code
+    referral_code,
+    user_role
   } = req.body
 
   await authRegisterService({
@@ -19,7 +20,8 @@ export const authRegisterController = async (req: Request, res: Response) => {
     email: email,
     password: password,
     phoneNumber: phone_number,
-    referralCode: referral_code
+    referralCode: referral_code,
+    userRole: user_role
   })
 
   res.status(201).json({
