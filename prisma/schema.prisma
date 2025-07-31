@@ -86,9 +86,13 @@ model Event {
   category        Category
   startDate       DateTime @map("start_date")
   endDate         DateTime @map("end_date")
+
   venueId         String   @map("venue_id") @db.VarChar(36)
+  venue           Venue          @relation(fields: [venueId], references: [id])
+
   description     String
   availableTicket Int      @map("available_id")
+  price Int
 
   purchase_orders PurchaseOrders[]
   testimoni       Testimoni[]
@@ -112,7 +116,7 @@ model Venue {
   venueCapacity Int    @map("venue_capacity")
   address       String
 
-  purchase_orders PurchaseOrders[]
+  events          Event[]
 
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
@@ -154,17 +158,14 @@ model PurchaseOrders {
   eventId String? @map("event_id") @db.VarChar(36)
   event   Event?  @relation(fields: [eventId], references: [id])
 
-  venueId String? @map("venue_id") @db.VarChar(36)
-  venue   Venue?  @relation(fields: [venueId], references: [id])
-
   quantity Int
   price    Int
 
-  discountId String @map("coupon_id") @db.VarChar(36)
-  discount   Coupon @relation(fields: [discountId], references: [id])
+  discountId String? @map("coupon_id") @db.VarChar(36)
+  discount   Coupon? @relation(fields: [discountId], references: [id])
 
-  UserPointsId String    @map("user_points_id")
-  user_points  UserPoint @relation(fields: [UserPointsId], references: [id])
+  UserPointsId String?    @map("user_points_id")
+  user_points  UserPoint? @relation(fields: [UserPointsId], references: [id])
 
   finalPrice   Int       @map("final_price")
   paymentProff String    @map("payment_proof")

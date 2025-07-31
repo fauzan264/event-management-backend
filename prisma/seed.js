@@ -1,0 +1,42 @@
+const { PrismaClient } = require('../src/generated/prisma');
+const prisma = new PrismaClient();
+const bcrypt = require('bcrypt');
+
+const venue = [
+  {
+    venueName : 'Gelora Bung Karno',
+    venueCapacity : 50000,
+    address: 'Jl. Pintu Satu Senayan, Gelora, Kecamatan Tanah Abang, Kota Jakarta Pusat, Daerah Khusus Ibukota Jakarta 10270.'
+},
+
+];
+
+const event = [
+  {
+    eventName: 'Black Pink DEADLINE',
+    category : 'MUSIC',
+    startDate: new Date("2025-11-01T18:00:00Z"), 
+    endDate: new Date("2025-11-02T22:00:00Z"),
+    venueId : '53a58556-7113-4fb7-9008-b333c0820275',
+    description: 'Jakarta, get ready! Global icon girl group, BLACKPINK, has announced their Asia tour, BLACKPINK WORLD TOUR <DEADLINE>,The concert will take place on November 1-2, 2025, at Gelora Bung Karno Main Stadium, Jakarta!',
+    availableTicket: 50000000,
+    price: 2500000
+  }
+
+];
+
+
+async function main() {
+
+  await prisma.event.createMany({
+    data: event,
+  });
+}
+
+main()
+  .catch((error) => {
+    console.log(error);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
