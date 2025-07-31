@@ -3,29 +3,27 @@ import { purchaseOrderservice } from "../services/purchase.service";
 
 
 export const purchaseOrderController = async (req:Request, res:Response) => {
+    const { eventId } = req.params;
+
     const {
         fullName,
         email,
-        eventId,
         quantity,
         price,
         discountId,
         UserPointsId,
         finalPrice,
-        orderStatus
             } = req.body;
 
 const newOrder = await purchaseOrderservice ({
+    eventId,
     fullName,
     email,
-    eventId,
     quantity,
     price,
     discountId,
     UserPointsId,
-    finalPrice,
-    orderStatus,
-
+    finalPrice
 })
     res.status(201).json ({
         success:true,

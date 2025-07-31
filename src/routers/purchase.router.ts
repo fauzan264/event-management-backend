@@ -3,7 +3,7 @@ import {purchaseOrderController} from '../controllers/purchase.controller'
 
 const purchaseRouter = Router()
 
-purchaseRouter.post('/purchase-order', purchaseOrderController);
+purchaseRouter.post('/:eventId/purchase-order', purchaseOrderController);
 
 export default purchaseRouter;
 

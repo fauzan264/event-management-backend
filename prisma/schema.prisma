@@ -168,7 +168,7 @@ model PurchaseOrders {
   user_points  UserPoint? @relation(fields: [UserPointsId], references: [id])
 
   finalPrice   Int       @map("final_price")
-  paymentProff String    @map("payment_proof")
+  paymentProof String?    @map("payment_proof")
   orderStatus  String    @map("order_status") @db.VarChar(36)
   createdAt    DateTime  @default(now()) @map("created_at")
   updatedAt    DateTime  @updatedAt @map("updated_at")
