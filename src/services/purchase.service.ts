@@ -8,8 +8,19 @@ export const purchaseOrderservice = async ({
   price,
   discountId,
   UserPointsId,
-  finalPrice,
-  orderStatus,
-}: Omit<PurchaseOrders, 'id' | 'venueId' | 'paymentProff' | 'createdAt' | 'updatedAt' | 'deletedAt'>) => {
-  
+  finalPrice
+}: Omit<PurchaseOrders, 'id' | 'paymentProof' |'orderStatus'| 'createdAt' | 'updatedAt' | 'deletedAt'>) => {
+    return await prisma.purchaseOrders.create ({
+      data: {
+        eventId,
+        fullName,
+        email,
+        quantity,
+        price,
+        discountId,
+        UserPointsId,
+        finalPrice,
+        orderStatus: 'Waiting for payment'
+      }
+    })
 }

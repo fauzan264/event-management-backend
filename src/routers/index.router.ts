@@ -5,6 +5,6 @@ import purchaseRouter from "./purchase.router"
 const mainRouter = Router()
 
 mainRouter.use('/api/auth', authRouter)
-mainRouter.use('/api/event', purchaseRouter)
+mainRouter.use('/api/events', purchaseRouter)
 
 export default mainRouter
