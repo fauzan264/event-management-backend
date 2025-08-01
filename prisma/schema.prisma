@@ -76,23 +76,28 @@ model EventOrganizer {
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
+  Event     Event[]
 
   @@map("event_organizer")
 }
 
 model Event {
-  id              String   @id @default(uuid()) @db.VarChar(36)
-  eventName       String   @map("event_name") @db.VarChar(100)
-  category        Category
-  startDate       DateTime @map("start_date")
-  endDate         DateTime @map("end_date")
+  id        String   @id @default(uuid()) @db.VarChar(36)
+  eventName String   @map("event_name") @db.VarChar(100)
+  category  Category
+  startDate DateTime @map("start_date")
+  endDate   DateTime @map("end_date")
+  imageUrl  String   @map("image_url")
 
-  venueId         String   @map("venue_id") @db.VarChar(36)
-  venue           Venue          @relation(fields: [venueId], references: [id])
+  eventOrganizerId String         @map("event_organizer_id") @db.VarChar(36)
+  eventOrganizer   EventOrganizer @relation(fields: [eventOrganizerId], references: [id])
+
+  venueId String @map("venue_id") @db.VarChar(36)
+  venue   Venue  @relation(fields: [venueId], references: [id])
 
   description     String
-  availableTicket Int      @map("available_id")
-  price Int
+  availableTicket Int    @map("available_ticket")
+  price           Int
 
   purchase_orders PurchaseOrders[]
   testimoni       Testimoni[]
@@ -116,7 +121,7 @@ model Venue {
   venueCapacity Int    @map("venue_capacity")
   address       String
 
-  events          Event[]
+  events Event[]
 
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
@@ -168,7 +173,7 @@ model PurchaseOrders {
   user_points  UserPoint? @relation(fields: [UserPointsId], references: [id])
 
   finalPrice   Int       @map("final_price")
-  paymentProof String?    @map("payment_proof")
+  paymentProof String?   @map("payment_proof")
   orderStatus  String    @map("order_status") @db.VarChar(36)
   createdAt    DateTime  @default(now()) @map("created_at")
   updatedAt    DateTime  @updatedAt @map("updated_at")
