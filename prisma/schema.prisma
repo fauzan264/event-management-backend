@@ -68,7 +68,7 @@ model EventOrganizer {
   address     String?
   websiteUrl  String? @map("website_url")
   bankAccount String? @map("bank_account") @db.VarChar(36)
-  userId      String  @map("user_id") @db.VarChar(36)
+  userId      String  @unique @map("user_id") @db.VarChar(36)
 
   coupon Coupon[]
   user   User     @relation(fields: [userId], references: [id])
@@ -106,6 +106,10 @@ model Event {
   updatedAt DateTime  @updatedAt @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
+  @@index([eventOrganizerId])
+  @@index([eventName])
+  @@index([category])
+  @@index([deletedAt])
   @@map("event")
 }
 
