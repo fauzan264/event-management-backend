@@ -160,8 +160,8 @@ model PurchaseOrders {
   fullName String @map("fullname")
   email    String
 
-  eventId String? @map("event_id") @db.VarChar(36)
-  event   Event?  @relation(fields: [eventId], references: [id])
+  eventId String @map("event_id") @db.VarChar(36)
+  event   Event  @relation(fields: [eventId], references: [id])
 
   quantity Int
   price    Int
@@ -177,6 +177,7 @@ model PurchaseOrders {
   orderStatus  String    @map("order_status") @db.VarChar(36)
   createdAt    DateTime  @default(now()) @map("created_at")
   updatedAt    DateTime  @updatedAt @map("updated_at")
+  expiredAt    DateTime  @map("expired_at")
   deletedAt    DateTime? @map("deleted_at")
 
   @@map("purchase_orders")
