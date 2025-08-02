@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { eventCreateService } from "../services/event.service";
+import { eventCreateService, getAllEventService } from "../services/event.service";
 
 export const eventCreateController = async (req: Request, res: Response) => {
   const {
@@ -21,9 +21,7 @@ export const eventCreateController = async (req: Request, res: Response) => {
     ? (req.files as Record<string, Express.Multer.File[]>).image || []
     : []
 
-  console.log(imageUrl)
-
-  const { event, eventOrganizer, venue } = await eventCreateService({
+  const event = await eventCreateService({
     eventName: event_name,
     category,
     startDate: new Date(start_date),
@@ -37,31 +35,31 @@ export const eventCreateController = async (req: Request, res: Response) => {
     userId
   })
 
-  const response = {
-    id: event?.id,
-    event_name: event?.eventName,
-    category: event?.category,
-    start_date: event?.startDate,
-    end_date: event?.endDate,
-    image_url: event?.imageUrl,
-    description: event?.description,
-    available_ticket: event?.availableTicket,
-    price: event?.price,
-    created_at: event?.createdAt,
-    updated_at: event?.updatedAt,
-    event_organizer: {
-      name: eventOrganizer?.companyName
-    },
-    venue: {
-      name: venue?.venueName,
-      capacity: venue?.venueCapacity,
-      address: venue?.address
-    }
-  }
-
   return res.status(201).json({
     status: true,
     message: 'Create event successful',
-    data: response
+    data: event
+  })
+}
+
+export const getAllEventController = async (req: Request, res: Response) => {
+  let {
+    event_name,
+    category,
+    page,
+    limit
+  } = req.query
+
+  const events = await getAllEventService({
+    eventName: event_name ? String(event_name) : undefined,
+    category: category ? String(category) : undefined,
+    page: page ? Number(page) : undefined,
+    limit: limit ? Number(limit) : undefined
+  })
+
+  return res.status(200).json({
+    status: true,
+    message: "success get data",
+    data: events
   })
 }
