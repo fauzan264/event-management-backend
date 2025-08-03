@@ -69,6 +69,7 @@ model EventOrganizer {
   websiteUrl  String? @map("website_url")
   bankAccount String? @map("bank_account") @db.VarChar(36)
   userId      String  @unique @map("user_id") @db.VarChar(36)
+  bannerUrl   String? @map("banner_url") @db.VarChar(200)
 
   coupon Coupon[]
   user   User     @relation(fields: [userId], references: [id])
