@@ -9,6 +9,7 @@ export const createEventController = async (req: Request, res: Response) => {
     end_date,
     description,
     price,
+    available_ticket,
     venue_name,
     venue_capacity,
     address
@@ -30,6 +31,7 @@ export const createEventController = async (req: Request, res: Response) => {
     imageUrl, 
     description,
     price: Number(price),
+    availableTicket: available_ticket,
     venueName: venue_name,
     venueCapacity: Number(venue_capacity),
     address,

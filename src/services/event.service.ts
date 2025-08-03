@@ -4,7 +4,7 @@ import { Category, Event, Venue } from "../generated/prisma";
 import { cloudinaryUpload } from "../lib/cloudinary.upload";
 import { DateTime } from "luxon";
 
-interface ICreateEventServiceProps extends Pick<Event, 'eventName' | 'category' | 'startDate' | 'endDate' |  'description' | 'price'> {
+interface ICreateEventServiceProps extends Pick<Event, 'eventName' | 'category' | 'startDate' | 'endDate' |  'description' | 'price' | 'availableTicket'> {
   imageUrl: Express.Multer.File[]
 }
 
@@ -21,6 +21,7 @@ export const createEventService = async ({
   endDate,
   description,
   price,
+  availableTicket,
   imageUrl,
   venueName,
   venueCapacity,
@@ -75,7 +76,7 @@ export const createEventService = async ({
         imageUrl: imageCreate[0].imageUrl,
         description,
         price,
-        availableTicket: venueCapacity,
+        availableTicket,
         venueId: venue?.id,
         eventOrganizerId: eventOrganizer?.id,
         createdAt: DateTime.now().setZone('Asia/Jakarta').toJSDate()
@@ -107,6 +108,8 @@ export const createEventService = async ({
 
   const formattedResponse = {
     ...result,
+    startDate: DateTime.fromJSDate(result.startDate).setZone('Asia/Jakarta').toISO(),
+    endDate: DateTime.fromJSDate(result.endDate).setZone('Asia/Jakarta').toISO(),
     createdAt: DateTime.fromJSDate(result.createdAt).setZone('Asia/Jakarta').toISO(),
     updatedAt: DateTime.fromJSDate(result.updatedAt).setZone('Asia/Jakarta').toISO()
   }
