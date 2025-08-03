@@ -2,12 +2,13 @@ import snakecaseKeys from "snakecase-keys";
 import { prisma } from "../db/connection";
 import { Category, Event, Venue } from "../generated/prisma";
 import { cloudinaryUpload } from "../lib/cloudinary.upload";
+import { DateTime } from "luxon";
 
 interface ICreateEventServiceProps extends Pick<Event, 'eventName' | 'category' | 'startDate' | 'endDate' |  'description' | 'price'> {
   imageUrl: Express.Multer.File[]
 }
 
-export const eventCreateService = async ({
+export const createEventService = async ({
   eventName,
   category,
   startDate,
@@ -40,6 +41,15 @@ export const eventCreateService = async ({
   if (startDate > endDate) {
     throw { message: "Start date must be earlier than or equal to end date.", isExpose: true}
   }
+
+  const uploadImage = imageUrl.map(async(image) => {
+    const res: any = await cloudinaryUpload(image?.buffer, 'event')
+
+    return { imageUrl: res.secureUrl }
+  })
+
+  const imageCreate = await Promise.all(uploadImage)
+
   const result = await prisma.$transaction(async(tx) => {
     // create venue
     const venue = await tx.venue.create({
@@ -49,14 +59,6 @@ export const eventCreateService = async ({
         address
       }
     })
-
-    const uploadImage = imageUrl.map(async(image) => {
-      const res: any = await cloudinaryUpload(image?.buffer, 'event')
-
-      return { imageUrl: res.secureUrl }
-    })
-
-    const imageCreate = await Promise.all(uploadImage)
   
     // create event
     const event = await tx.event.create({
@@ -70,7 +72,8 @@ export const eventCreateService = async ({
         price,
         availableTicket: venueCapacity,
         venueId: venue?.id,
-        eventOrganizerId: eventOrganizer?.id
+        eventOrganizerId: eventOrganizer?.id,
+        createdAt: DateTime.now().setZone('Asia/Jakarta').toJSDate()
       },
       include: {
         eventOrganizer: {
@@ -90,8 +93,14 @@ export const eventCreateService = async ({
       
     return event
   })
+
+  const formattedResponse = {
+    ...result,
+    createdAt: DateTime.fromJSDate(result.createdAt).setZone('Asia/Jakarta').toISO(),
+    updatedAt: DateTime.fromJSDate(result.updatedAt).setZone('Asia/Jakarta').toISO()
+  }
   
-  return snakecaseKeys(result, {deep: true})
+  return snakecaseKeys(formattedResponse, {deep: true})
 }
 
 interface IGetAllEventServiceProps {

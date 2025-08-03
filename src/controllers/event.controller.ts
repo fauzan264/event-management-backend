@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import { eventCreateService, getAllEventService } from "../services/event.service";
+import { createEventService, getAllEventService } from "../services/event.service";
 
-export const eventCreateController = async (req: Request, res: Response) => {
+export const createEventController = async (req: Request, res: Response) => {
   const {
     event_name,
     category,
@@ -21,7 +21,7 @@ export const eventCreateController = async (req: Request, res: Response) => {
     ? (req.files as Record<string, Express.Multer.File[]>).image || []
     : []
 
-  const event = await eventCreateService({
+  const event = await createEventService({
     eventName: event_name,
     category,
     startDate: new Date(start_date),
