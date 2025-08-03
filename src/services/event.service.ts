@@ -130,7 +130,9 @@ export const getAllEventService = async ({
   page,
   limit
 }: IGetAllEventServiceProps ) => {
-  const where: any = {}
+  const where: any = {
+    deletedAt: null
+  }
 
   if (eventName)
     where.eventName = {
@@ -152,9 +154,12 @@ export const getAllEventService = async ({
   const totalPages = Math.ceil(totalData / limitNumber)
 
   const events = await prisma.event.findMany({
-    where: Object.keys(where).length > 0 ? where : undefined,
+    where: Object.keys(where).length > 1 ? where : undefined,
     skip: offset,
     take: limitNumber,
+    orderBy: {
+      createdAt: 'desc'
+    },
     omit: {
       venueId: true,
       eventOrganizerId: true,
@@ -299,4 +304,37 @@ export const updateEventService = async ({
   }
 
   return snakecaseKeys(formattedResponse, { deep: true  })
+}
+
+export const deleteEventService = async ({
+  id,
+  userId
+}: Pick<Event, 'id'> & { userId: string }) => {
+  const event = await prisma.event.findUnique({
+    where: {
+      id
+    }
+  })
+
+  if (!event)
+    throw { message: `Event not found.`, isExpose: true }
+
+  const eventOrganizer = await prisma.eventOrganizer.findUnique({
+    where: {
+      userId
+    }
+  })
+
+  if (event.eventOrganizerId != eventOrganizer?.id)
+    throw { message: `Access denied. You do not have permission to modify this event`, isExpose: true }
+
+  await prisma.event.update({
+    data: {
+      updatedAt: DateTime.now().setZone('Asia/Jakarta').toJSDate(),
+      deletedAt: DateTime.now().setZone('Asia/Jakarta').toJSDate()
+    },
+    where: {
+      id
+    }
+  })
 }

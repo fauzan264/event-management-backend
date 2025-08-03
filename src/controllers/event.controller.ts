@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
-import { createEventService, getAllEventService, updateEventService } from "../services/event.service";
+import { createEventService, deleteEventService, getAllEventService, updateEventService } from "../services/event.service";
+import { updateEventOrganizerService } from "../services/event.organizer.service";
 
 export const createEventController = async (req: Request, res: Response) => {
   const {
@@ -111,5 +112,20 @@ export const updateEventController = async (req: Request, res: Response) => {
     status: true,
     message: 'Event updated successfully.',
     data: event
+  })
+}
+
+export const deleteEventController = async (req: Request, res: Response) => {
+  const { eventId } = req.params
+  const { userId } = res.locals.payload
+
+  await deleteEventService({
+    id: eventId,
+    userId
+  })
+
+  return res.status(200).json({
+    status: true,
+    message: 'Event deleted successfully.'
   })
 }
