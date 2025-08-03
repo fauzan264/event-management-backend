@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
-import { eventCreateService, getAllEventService } from "../services/event.service";
+import { createEventService, deleteEventService, getAllEventService, updateEventService } from "../services/event.service";
+import { updateEventOrganizerService } from "../services/event.organizer.service";
 
-export const eventCreateController = async (req: Request, res: Response) => {
+export const createEventController = async (req: Request, res: Response) => {
   const {
     event_name,
     category,
@@ -9,10 +10,12 @@ export const eventCreateController = async (req: Request, res: Response) => {
     end_date,
     description,
     price,
+    available_ticket,
     venue_name,
     venue_capacity,
     address
   } = req.body
+
   const { userId } = res.locals.payload
 
   const imageUrl = Array.isArray(req?.files)
@@ -21,7 +24,7 @@ export const eventCreateController = async (req: Request, res: Response) => {
     ? (req.files as Record<string, Express.Multer.File[]>).image || []
     : []
 
-  const event = await eventCreateService({
+  const event = await createEventService({
     eventName: event_name,
     category,
     startDate: new Date(start_date),
@@ -29,6 +32,7 @@ export const eventCreateController = async (req: Request, res: Response) => {
     imageUrl, 
     description,
     price: Number(price),
+    availableTicket: available_ticket,
     venueName: venue_name,
     venueCapacity: Number(venue_capacity),
     address,
@@ -61,5 +65,67 @@ export const getAllEventController = async (req: Request, res: Response) => {
     status: true,
     message: "success get data",
     data: events
+  })
+}
+
+export const updateEventController = async (req: Request, res: Response) => {
+  const {
+    event_name,
+    category,
+    start_date,
+    end_date,
+    description,
+    price,
+    available_ticket,
+    venue_name,
+    venue_capacity,
+    address
+  } = req.body
+  
+  const { userId } = res.locals.payload
+
+  const imageUrl = Array.isArray(req?.files)
+    ? req.files
+    : req.files
+    ? (req.files as Record<string, Express.Multer.File[]>).image || []
+    : []
+
+  const { eventId } = req.params
+
+  const event = await updateEventService({
+    id: eventId,
+    eventName: event_name,
+    category,
+    startDate: new Date(start_date),
+    endDate: new Date(end_date),
+    imageUrl, 
+    description,
+    price: Number(price),
+    availableTicket: Number(available_ticket),
+    venueName: venue_name,
+    venueCapacity: Number(venue_capacity),
+    address,
+    userId
+  })
+
+  return res.status(200).json({
+    status: true,
+    message: 'Event updated successfully.',
+    data: event
+  })
+}
+
+export const deleteEventController = async (req: Request, res: Response) => {
+  const { eventId } = req.params
+  const { userId } = res.locals.payload
+
+  await deleteEventService({
+    id: eventId,
+    userId
+  })
+
+  return res.status(200).json({
+    status: true,
+    message: 'Event deleted successfully.'
   })
 }
