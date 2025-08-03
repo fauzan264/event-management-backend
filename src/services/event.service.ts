@@ -192,6 +192,21 @@ export const getEventByIdService = async ({
       venueId: true,
       eventOrganizerId: true,
       deletedAt: true
+    },
+    include: {
+      eventOrganizer: {
+        select: {
+          id: true,
+          companyName: true
+        }
+      },
+      venue: {
+        select: {
+          venueName: true,
+          venueCapacity: true,
+          address: true
+        }
+      }
     }
   })
 
