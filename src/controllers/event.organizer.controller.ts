@@ -32,7 +32,6 @@ export const updateEventOrganizerController = async (req: Request, res: Response
     bannerUrl,
     userId
   })
-  console.log(eventOrganizer)
 
   return res.status(200).json({
     status: true,

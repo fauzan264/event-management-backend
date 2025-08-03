@@ -2,6 +2,7 @@ import snakecaseKeys from "snakecase-keys";
 import { prisma } from "../db/connection";
 import { EventOrganizer } from "../generated/prisma";
 import { cloudinaryUpload } from "../lib/cloudinary.upload";
+import { DateTime } from "luxon";
 
 interface IUpdateEventOrganizerServiceProps extends Omit<EventOrganizer, 'bannerUrl' | 'createdAt' | 'updatedAt' | 'deletedAt'> {
   bannerUrl?: Express.Multer.File[]
@@ -60,8 +61,8 @@ export const updateEventOrganizerService = async ({
       address: address ? address : eventOrganizer.address,
       websiteUrl: websiteUrl ? websiteUrl : eventOrganizer.websiteUrl,
       bankAccount: bankAccount ? bankAccount : eventOrganizer.bankAccount,
-      bannerUrl: createBanner[0].bannerUrl != undefined ? createBanner[0].bannerUrl : eventOrganizer.bannerUrl,
-      updatedAt: new Date()
+      bannerUrl: createBanner[0]?.bannerUrl != undefined ? createBanner[0]?.bannerUrl : eventOrganizer.bannerUrl,
+      updatedAt: DateTime.now().setZone('Asia/Jakarta').toJSDate()
     }
 
     const updateEventOrganizer = await tx.eventOrganizer.update({
@@ -78,5 +79,11 @@ export const updateEventOrganizerService = async ({
     return updateEventOrganizer
   })
 
-  return snakecaseKeys(result)
+  const formattedResponse = {
+    ...result,
+    createdAt: DateTime.fromJSDate(result.createdAt).setZone('Asia/Jakarta').toISO(),
+    updatedAt: DateTime.fromJSDate(result.updatedAt).setZone('Asia/Jakarta').toISO()
+  }
+
+  return snakecaseKeys(formattedResponse)
 }
