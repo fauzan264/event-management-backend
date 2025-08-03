@@ -181,6 +181,34 @@ export const getAllEventService = async ({
   return snakecaseKeys(response)
 }
 
+export const getEventByIdService = async ({
+  id
+}: Pick<Event, 'id'>) => {
+  const event = await prisma.event.findUnique({
+    where: {
+      id
+    },
+    omit: {
+      venueId: true,
+      eventOrganizerId: true,
+      deletedAt: true
+    }
+  })
+
+  if (!event)
+    throw { message: `Event not found.`, isExpose: true }
+
+  const formattedResponse = {
+    ...event,
+    startDate: DateTime.fromJSDate(event.startDate).setZone('Asia/Jakarta').toISO(),
+    endDate: DateTime.fromJSDate(event.endDate).setZone('Asia/Jakarta').toISO(),
+    createdAt: DateTime.fromJSDate(event.createdAt).setZone('Asia/Jakarta').toISO(),
+    updatedAt: DateTime.fromJSDate(event.updatedAt).setZone('Asia/Jakarta').toISO()
+  }
+
+  return snakecaseKeys(formattedResponse, { deep: true })
+}
+
 export const updateEventService = async ({
   id,
   eventName,

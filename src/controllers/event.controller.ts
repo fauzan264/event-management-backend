@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
-import { createEventService, deleteEventService, getAllEventService, updateEventService } from "../services/event.service";
-import { updateEventOrganizerService } from "../services/event.organizer.service";
+import { createEventService, deleteEventService, getAllEventService, getEventByIdService, updateEventService } from "../services/event.service";
 
 export const createEventController = async (req: Request, res: Response) => {
   const {
@@ -41,7 +40,7 @@ export const createEventController = async (req: Request, res: Response) => {
 
   return res.status(201).json({
     status: true,
-    message: 'Create event successful',
+    message: 'Successfully fetched list of events.',
     data: event
   })
 }
@@ -63,8 +62,20 @@ export const getAllEventController = async (req: Request, res: Response) => {
 
   return res.status(200).json({
     status: true,
-    message: "success get data",
+    message: "Successfully fetched list of events.",
     data: events
+  })
+}
+
+export const getEventByIdController = async (req: Request, res: Response) => {
+  const { eventId } = req.params
+
+  const event = await getEventByIdService({ id: eventId })
+
+  return res.status(200).json({
+    status: true,
+    message: 'Event details fetched successfully.',
+    data: event
   })
 }
 
