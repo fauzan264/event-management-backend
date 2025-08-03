@@ -75,6 +75,12 @@ export const createEventService = async ({
         eventOrganizerId: eventOrganizer?.id,
         createdAt: DateTime.now().setZone('Asia/Jakarta').toJSDate()
       },
+      omit: {
+        venueId: true,
+        eventOrganizerId: true,
+        description: true,
+        deletedAt: true
+      },
       include: {
         eventOrganizer: {
           select: {
@@ -145,7 +151,6 @@ export const getAllEventService = async ({
       venueId: true,
       eventOrganizerId: true,
       description: true,
-      updatedAt: true,
       deletedAt: true
     }
   })
