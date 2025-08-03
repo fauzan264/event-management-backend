@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { createEventService, deleteEventService, getAllEventService, getEventByIdService, updateEventService } from "../services/event.service";
+import { authSessionLoginService } from "../services/auth.service";
 
 export const createEventController = async (req: Request, res: Response) => {
   const {
@@ -138,5 +139,17 @@ export const deleteEventController = async (req: Request, res: Response) => {
   return res.status(200).json({
     status: true,
     message: 'Event deleted successfully.'
+  })
+}
+
+export const authSessionLoginController = async (req: Request, res: Response) => {
+  const { userId } = res.locals.payload
+
+  const { role, fullname } = await authSessionLoginService({ id: userId })
+
+  res.status(200).json({
+    success: true,
+    message: 'Session data retrieved successfully.',
+    data: { fullname, role }
   })
 }

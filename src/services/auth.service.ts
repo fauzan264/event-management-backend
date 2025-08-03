@@ -181,3 +181,16 @@ export const authResetPasswordService = async ({id, password}: Pick<User, 'id' |
     where: { id }
   })
 }
+
+export const authSessionLoginService = async ({ id }: Pick<User, 'id'>) => {
+  const user = await prisma.user.findUnique({
+    where: {
+      id
+    }
+  })
+
+  return {
+    role: user?.userRole,
+    fullname: user?.fullName
+  }
+}
