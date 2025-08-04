@@ -1,19 +1,31 @@
 import { prisma } from "../db/connection";
 import { PurchaseOrders } from "../generated/prisma";
+import { DateTime } from "luxon";
 
 export const purchaseOrderservice = async ({
+  userId,
   fullName,
   email,
   eventId,
   quantity,
   discountId,
   UserPointsId,
-}: Omit<PurchaseOrders, 'id' |'price'|'finalPrice'| 'paymentProof' | 'orderStatus' | 'createdAt' | 'updatedAt' | 'expiredAt' | 'deletedAt'>) => {
+}: Omit<
+  PurchaseOrders,
+  | "id"
+  | "price"
+  | "finalPrice"
+  | "paymentProof"
+  | "orderStatus"
+  | "createdAt"
+  | "updatedAt"
+  | "expiredAt"
+  | "deletedAt"
+> & { userId: string }) => {
   return await prisma.$transaction(async (tx) => {
-    
-    //Event Validation
+    // Event Validation
     const event = await tx.event.findUnique({
-      where: { id: eventId }
+      where: { id: eventId },
     });
 
     if (!event) {
@@ -24,10 +36,10 @@ export const purchaseOrderservice = async ({
       throw new Error("Not enough tickets available.");
     }
 
-    //Initial price
+    // Initial price
     const initPrice = event.price * quantity;
 
-    //Discount Validation
+    // Discount Validation
     let discount = null;
     if (discountId) {
       discount = await tx.coupon.findUnique({ where: { id: discountId } });
@@ -36,7 +48,7 @@ export const purchaseOrderservice = async ({
       }
     }
 
-    //Point Validation
+    // Point Validation
     let userPoint = null;
     if (UserPointsId) {
       userPoint = await tx.userPoint.findUnique({ where: { id: UserPointsId } });
@@ -45,20 +57,20 @@ export const purchaseOrderservice = async ({
       }
     }
 
-    //Count Final Price After Discount and Point Usage
+    // Final Price
     const discountValue = discount?.discountValue || 0;
     const pointUsed = userPoint?.points || 0;
-
     const priceAfterDiscount = initPrice * (1 - discountValue / 100);
     const calculatedFinalPrice = Math.max(priceAfterDiscount - pointUsed, 0);
 
-    //ExpireAt
-    const now = new Date();
-    const expiredAt = new Date(now.getTime() + 2 * 60 * 60 * 1000);
+    // ExpireAt
+    const now = DateTime.now().setZone("Asia/Jakarta");
+    const expiredAt = now.plus({ hours: 2 }).toJSDate();
 
-    //Create Order
+    // Create Order
     const order = await tx.purchaseOrders.create({
       data: {
+        userId, // <- Tambahkan userId ke dalam order
         eventId,
         fullName,
         email,
@@ -70,20 +82,19 @@ export const purchaseOrderservice = async ({
         orderStatus: "Waiting for payment",
         expiredAt,
       },
-        include: {
-          event: {
-            select: {
-              id: true,
-              eventName: true,
-              availableTicket: true,
+      include: {
+        event: {
+          select: {
+            id: true,
+            eventName: true,
+            availableTicket: true,
+          },
+        },
       },
-    },
-  },
-
     });
 
-    //Update Remaining Ticket
-    const updatedEvent = await tx.event.update({
+    // Update Remaining Ticket
+    await tx.event.update({
       where: { id: eventId },
       data: {
         availableTicket: {
@@ -92,40 +103,108 @@ export const purchaseOrderservice = async ({
       },
     });
 
+    // Decrement availableCoupon if used
+    if (order.discountId) {
+      await tx.coupon.update({
+        where: { id: order.discountId },
+        data: {
+          availableCoupon: {
+            decrement: 1,
+          },
+        },
+      });
+    }
+
+    //Decrement Point
+    if (order.UserPointsId) {
+        const userPoint = await tx.userPoint.findUnique({
+          where: { id: order.UserPointsId }
+        });
+        if (userPoint) {
+          const returnPoint = userPoint.points
+          await tx.userPoint.update({
+            where:{ id: order.UserPointsId },
+            data: {
+              points : {
+                decrement : returnPoint
+              }
+            }
+          })
+        }
+      }
+
     return {
-      order
+      order,
     };
   });
 };
 
+export const expiredOrderService = async () => {
+  const now = new Date();
+  const expiredOrders = await prisma.purchaseOrders.findMany({
+    where: {
+      orderStatus: "Waiting for payment",
+      expiredAt: { lt: now },
+      paymentProof: null,
+    },
+  });
 
-  export const expiredOrderService = async () => {
-    const now = new Date ()
-    const expiredOrders = await prisma.purchaseOrders.findMany({
-      where : {
-        orderStatus : 'Waiting for payment',
-        expiredAt : {lt:now},
-        paymentProof : null
+  for (const order of expiredOrders) {
+    await prisma.$transaction(async (tx) => {
+      await tx.purchaseOrders.update({
+        where: { id: order.id },
+        data: { orderStatus: "Expired" },
+      });
+
+      await tx.event.update({
+        where: { id: order.eventId },
+        data: {
+          availableTicket: {
+            increment: order.quantity,
+          },
+        },
+      });
+
+      if (order.discountId) {
+        await tx.coupon.update({
+          where: { id: order.discountId },
+          data: {
+            availableCoupon: {
+              increment: 1,
+            },
+          },
+        });
+      }
+
+      if (order.UserPointsId) {
+        const userPoint = await tx.userPoint.findUnique({
+          where: { id: order.UserPointsId }
+        });
+        if (userPoint) {
+          const returnPoint = userPoint.points
+          await tx.userPoint.update({
+            where:{ id: order.UserPointsId },
+            data: {
+              points : {
+                increment : returnPoint
+              }
+            }
+          })
+        }
       }
     });
+    
 
-    for (const order of expiredOrders) {
-      await prisma.$transaction(async (tx) => {
-        await tx.purchaseOrders.update ({
-          where : {id : order.id},
-          data : {orderStatus : 'Expired'}
-        });
+    const formatted = {
+      ...order,
+      createdAt: DateTime.fromJSDate(order.createdAt).setZone("Asia/Jakarta").toISO(),
+      updatedAt: DateTime.fromJSDate(order.updatedAt).setZone("Asia/Jakarta").toISO(),
+      expiredAt: DateTime.fromJSDate(order.expiredAt).setZone("Asia/Jakarta").toISO(),
+      deletedAt: order.deletedAt
+        ? DateTime.fromJSDate(order.deletedAt).setZone("Asia/Jakarta").toISO()
+        : null,
+    };
 
-        await tx.event.update ({
-          where: {id:order.eventId},
-          data : {
-            availableTicket : {
-              increment: order.quantity
-            }
-          }
-        })
-      })
-    }
+    console.log(formatted);
   }
-
-
+};

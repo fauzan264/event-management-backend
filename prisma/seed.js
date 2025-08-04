@@ -25,13 +25,23 @@ const event = [
     price: 2500000
   }
 
+
 ];
 
+const coupon = [
+  {
+        discountValue: 10,
+        provider_type: 'APP',
+        providerId: null,
+        description: 'Diskon 10% untuk semua event',
+        availableCoupon: 100,
+  }
+]
 
 async function main() {
 
-  await prisma.event.createMany({
-    data: event,
+  await prisma.coupon.createMany({
+    data: coupon,
   });
 }
 

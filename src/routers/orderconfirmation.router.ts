@@ -1,9 +1,10 @@
 import { Router } from "express";
 import { orderConfirmationController } from "../controllers/orderconfirmation.controller";
+import { jwtVerify } from "../middleware/jwt.verify";
 
 
-const orderConfirmationrouter = Router();
+const orderConfirmationRouter = Router();
 
-orderConfirmationrouter.patch("/:id/status", orderConfirmationController);
+orderConfirmationRouter.patch("/:id/status",jwtVerify, orderConfirmationController);
 
-export default orderConfirmationrouter;
+export default orderConfirmationRouter;

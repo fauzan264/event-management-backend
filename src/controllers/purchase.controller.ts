@@ -4,6 +4,7 @@ import { expiredOrderService, purchaseOrderservice } from "../services/purchase.
 
 export const purchaseOrderController = async (req:Request, res:Response) => {
     const { eventId } = req.params;
+    const {userId} = res.locals.payload;
 
     const {
         fullName,
@@ -14,6 +15,7 @@ export const purchaseOrderController = async (req:Request, res:Response) => {
             } = req.body;
 
     const newOrder = await purchaseOrderservice ({
+        userId,
         eventId,
         fullName,
         email,

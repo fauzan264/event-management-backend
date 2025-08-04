@@ -6,6 +6,8 @@ import paymentRouter from "./uploadPayment"
 import orderConfirmationrouter from "./orderconfirmation.router"
 import eventOrganizerRouter from "./event.organizer.router"
 import userRouter from "./user.router"
+import orderConfirmationRouter from "./orderconfirmation.router"
+import reviewRouter from "./review.router"
 
 const mainRouter = Router()
 
@@ -16,5 +18,7 @@ mainRouter.use('/api/purchase-order/uploadPayment', paymentRouter)
 mainRouter.use('/api/purchase-order/', orderConfirmationrouter)
 mainRouter.use('/api/event-organizers', eventOrganizerRouter)
 mainRouter.use('/api/users', userRouter)
+mainRouter.use('/api/purchase-order', orderConfirmationRouter)
+mainRouter.use('/api/event', reviewRouter)
 
 export default mainRouter
