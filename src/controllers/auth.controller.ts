@@ -1,5 +1,5 @@
 import { Request, Response } from "express"
-import { authGenenerateCodeReferralService, authLoginService, authRegisterService, authRequestResetPasswordService, authResetPasswordService } from "../services/auth.service"
+import { authChangePasswordService, authGenenerateCodeReferralService, authLoginService, authRegisterService, authRequestResetPasswordService, authResetPasswordService } from "../services/auth.service"
 
 export const authRegisterController = async (req: Request, res: Response) => {
   const {
@@ -80,3 +80,14 @@ export const authResetPasswordController = async (req: Request, res: Response) =
   })
 }
 
+export const authChangePasswordController = async (req: Request, res: Response) => {
+  const { old_password, new_password } = req.body
+  const { userId } = res.locals.payload
+
+  await authChangePasswordService({oldPassword: old_password, newPassword: new_password, userId})
+
+  res.status(200).json({
+    success: true,
+    message: 'Password changed successfully'
+  })
+}
