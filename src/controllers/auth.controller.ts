@@ -1,5 +1,5 @@
 import { Request, Response } from "express"
-import { authChangePasswordService, authGenenerateCodeReferralService, authLoginService, authRegisterService, authRequestResetPasswordService, authResetPasswordService } from "../services/auth.service"
+import { authChangePasswordService, authLoginService, authRegisterService, authRequestResetPasswordService, authResetPasswordService } from "../services/auth.service"
 
 export const authRegisterController = async (req: Request, res: Response) => {
   const {
@@ -43,17 +43,6 @@ export const authLoginController = async (req: Request, res: Response) => {
     success: true,
     message: `Login user successful`,
     data: { token, full_name: fullName }
-  })
-}
-
-export const authGenenerateCodeReferralController = async (req: Request, res: Response) => {
-  const { userId } = res.locals.payload
-
-  const referralCode = await authGenenerateCodeReferralService({id: userId})
-
-  res.status(200).json({
-    success: true,
-    data: { referral_code: referralCode }
   })
 }
 
