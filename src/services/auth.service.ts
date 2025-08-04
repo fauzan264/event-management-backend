@@ -194,3 +194,33 @@ export const authSessionLoginService = async ({ id }: Pick<User, 'id'>) => {
     fullname: user?.fullName
   }
 }
+
+export const authChangePasswordService = async ({oldPassword, newPassword, userId}: {oldPassword: string, newPassword: string, userId: string}) => {
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userId
+    }
+  })
+
+  if (!user) throw { message: `User not found`, isExpose: true }
+
+  const comparePassword = await bcrypt.compare(oldPassword, user?.password)
+
+  if (!comparePassword)
+    throw { message: 'The password you entered does not match our records.', isExpose: true }
+
+  if (oldPassword == newPassword)
+    throw { message: 'New password cannot be the same as the old password.', isExpose: true }
+
+  const saltRounds = 10
+  const hashedPassword = await bcrypt.hash(newPassword, saltRounds)
+
+  await prisma.user.update({
+    data: {
+      password: hashedPassword
+    },
+    where: {
+      id: userId
+    }
+  })
+}

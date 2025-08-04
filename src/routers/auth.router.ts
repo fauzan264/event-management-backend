@@ -1,5 +1,6 @@
 import { Router } from 'express'
 import {
+  authChangePasswordController,
   authGenenerateCodeReferralController,
   authLoginController,
   authRegisterController,
@@ -15,7 +16,8 @@ authRouter.post('/register', authRegisterController)
 authRouter.post('/login', authLoginController)
 authRouter.post('/generate/referral-code', jwtVerify, authGenenerateCodeReferralController)
 authRouter.post('/request-reset-password', authRequestResetPasswordController)
-authRouter.put('/reset-password', jwtVerify, authResetPasswordController)
+authRouter.post('/reset-password', jwtVerify, authResetPasswordController)
 authRouter.get('/session', jwtVerify, authSessionLoginController)
+authRouter.post('/change-password', jwtVerify, authChangePasswordController)
 
 export default authRouter
