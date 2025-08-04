@@ -37,12 +37,12 @@ export const authRegisterController = async (req: Request, res: Response) => {
 export const authLoginController = async (req: Request, res: Response) => {
   const { email, password } = req.body
 
-  const { token, fullName } = await authLoginService({ email, password })
+  const { token, fullName, role } = await authLoginService({ email, password })
 
   res.status(200).json({
     success: true,
     message: `Login user successful`,
-    data: { token, full_name: fullName }
+    data: { token, full_name: fullName, role }
   })
 }
 
