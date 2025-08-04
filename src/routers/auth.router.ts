@@ -4,10 +4,10 @@ import {
   authLoginController,
   authRegisterController,
   authRequestResetPasswordController,
-  authResetPasswordController
+  authResetPasswordController,
+  authSessionLoginController
 } from '../controllers/auth.controller'
 import { jwtVerify } from '../middleware/jwt.verify'
-import { authSessionLoginController } from '../controllers/event.controller'
 
 const authRouter = Router()
 
