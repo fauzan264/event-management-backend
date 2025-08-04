@@ -122,7 +122,7 @@ export const authLoginService = async ({email, password}: Pick<User, 'email' | '
     { algorithm: 'HS256' }
   )
 
-  return { token, fullName: findUserByEmail?.fullName }
+  return { token, fullName: findUserByEmail?.fullName, role: findUserByEmail?.userRole }
 }
 
 export const authRequestResetPasswordService = async ({email}: Pick<User, 'email'>) => {
