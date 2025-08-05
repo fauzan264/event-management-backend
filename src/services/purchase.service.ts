@@ -36,6 +36,19 @@ export const purchaseOrderservice = async ({
       throw new Error("Not enough tickets available.");
     }
 
+    // User Validation
+    const user = await tx.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    const fullName = user.fullName;
+    const email = user.email;
+
+
     // Initial price
     const initPrice = event.price * quantity;
 
@@ -68,9 +81,9 @@ export const purchaseOrderservice = async ({
     const expiredAt = now.plus({ hours: 2 }).toJSDate();
 
     // Create Order
-    const order = await tx.purchaseOrders.create({
+    const orders = await tx.purchaseOrders.create({
       data: {
-        userId, // <- Tambahkan userId ke dalam order
+        userId,
         eventId,
         fullName,
         email,
@@ -83,15 +96,32 @@ export const purchaseOrderservice = async ({
         expiredAt,
       },
       include: {
+        user: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true,
+          },
+        },
         event: {
           select: {
             id: true,
             eventName: true,
-            availableTicket: true,
           },
         },
+        discount: {
+          select : {
+            discountValue : true
+          }
+        },
+        user_points: {
+          select : {
+            points : true
+          }
+        }
       },
     });
+
 
     // Update Remaining Ticket
     await tx.event.update({
@@ -104,9 +134,9 @@ export const purchaseOrderservice = async ({
     });
 
     // Decrement availableCoupon if used
-    if (order.discountId) {
+    if (orders.discountId) {
       await tx.coupon.update({
-        where: { id: order.discountId },
+        where: { id: orders.discountId },
         data: {
           availableCoupon: {
             decrement: 1,
@@ -116,14 +146,14 @@ export const purchaseOrderservice = async ({
     }
 
     //Decrement Point
-    if (order.UserPointsId) {
+    if (orders.UserPointsId) {
         const userPoint = await tx.userPoint.findUnique({
-          where: { id: order.UserPointsId }
+          where: { id: orders.UserPointsId }
         });
         if (userPoint) {
           const returnPoint = userPoint.points
           await tx.userPoint.update({
-            where:{ id: order.UserPointsId },
+            where:{ id: orders.UserPointsId },
             data: {
               points : {
                 decrement : returnPoint
@@ -134,10 +164,99 @@ export const purchaseOrderservice = async ({
       }
 
     return {
-      order,
+      orders,
     };
   });
 };
+
+
+export const getAllOrderService = async () => {
+  const orders = await prisma.purchaseOrders.findMany({
+    where: {
+      deletedAt: null,
+    },
+    include: {
+      user: {
+        select: {
+          id: true,
+          fullName: true,
+          email: true,
+        },
+      },
+      event: {
+        select: {
+          id: true,
+          eventName: true,
+        },
+      },
+      discount: {
+        select: {
+          discountValue: true,
+        },
+      },
+      user_points: {
+        select: {
+          points: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  return orders;
+};
+
+export const getOrderDetailService = async (orderId: string) => {
+  const order = await prisma.purchaseOrders.findUnique({
+    where: { id: orderId },
+    include: {
+      user: {
+        select: {
+          fullName: true,
+          email: true,
+        },
+      },
+      event: {
+        select: {
+          eventName: true,
+        },
+      },
+      discount: {
+        select: {
+          discountValue: true,
+        },
+      },
+      user_points: {
+        select: {
+          points: true,
+        },
+      },
+    },
+  });
+
+  if (!order) {
+    throw new Error("Order not found");
+  }
+
+  return {
+    orderId: order.id,
+    fullName: order.user.fullName,
+    email: order.user.email,
+    eventName: order.event.eventName,
+    quantity: order.quantity,
+    price: order.price,
+    discountValue: order.discount?.discountValue || 0,
+    userPointsUsed: order.user_points?.points || 0,
+    finalPrice: order.finalPrice,
+    orderStatus: order.orderStatus,
+    paymentProof: order.paymentProof,
+    expiredAt: order.expiredAt,
+    createdAt: order.createdAt,
+  };
+};
+
 
 export const expiredOrderService = async () => {
   const now = new Date();
