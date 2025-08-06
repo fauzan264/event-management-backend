@@ -163,8 +163,11 @@ export const getAllEventService = async ({
     omit: {
       venueId: true,
       eventOrganizerId: true,
-      description: true,
       deletedAt: true
+    },
+    include : {
+      venue: true,
+
     }
   })
 
