@@ -24,6 +24,7 @@
     "@types/node": "^24.1.0",
     "@types/nodemailer": "^6.4.17",
     "bcrypt": "^6.0.0",
+    "bullmq": "^5.56.9",
     "cloudinary": "^2.7.0",
     "cors": "^2.8.5",
     "express": "^5.1.0",
