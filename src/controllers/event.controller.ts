@@ -1,5 +1,11 @@
 import { Request, Response } from "express";
-import { createEventService, deleteEventService, getAllEventService, getEventByIdService, updateEventService } from "../services/event.service";
+import {
+  createEventService,
+  deleteEventService,
+  getAllEventService,
+  getEventByIdService,
+  updateEventService,
+} from "../services/event.service";
 
 export const createEventController = async (req: Request, res: Response) => {
   const {
@@ -12,72 +18,67 @@ export const createEventController = async (req: Request, res: Response) => {
     available_ticket,
     venue_name,
     venue_capacity,
-    address
-  } = req.body
+    address,
+  } = req.body;
 
-  const { userId } = res.locals.payload
+  const { userId } = res.locals.payload;
 
   const imageUrl = Array.isArray(req?.files)
     ? req.files
     : req.files
     ? (req.files as Record<string, Express.Multer.File[]>).image || []
-    : []
+    : [];
 
   const event = await createEventService({
     eventName: event_name,
     category,
     startDate: new Date(start_date),
     endDate: new Date(end_date),
-    imageUrl, 
+    imageUrl,
     description,
     price: Number(price),
-    availableTicket: Number(available_ticket),
+    availableTicket: available_ticket,
     venueName: venue_name,
     venueCapacity: Number(venue_capacity),
     address,
-    userId
-  })
+    userId,
+  });
 
   return res.status(201).json({
     status: true,
-    message: 'Successfully fetched list of events.',
-    data: event
-  })
-}
+    message: "Event created successfully.",
+    data: event,
+  });
+};
 
 export const getAllEventController = async (req: Request, res: Response) => {
-  let {
-    event_name,
-    category,
-    page,
-    limit
-  } = req.query
+  let { event_name, category, page, limit } = req.query;
 
   const events = await getAllEventService({
     eventName: event_name ? String(event_name) : undefined,
     category: category ? String(category) : undefined,
     page: page ? Number(page) : undefined,
-    limit: limit ? Number(limit) : undefined
-  })
+    limit: limit ? Number(limit) : undefined,
+  });
 
   return res.status(200).json({
     status: true,
     message: "Successfully fetched list of events.",
-    data: events
-  })
-}
+    data: events,
+  });
+};
 
 export const getEventByIdController = async (req: Request, res: Response) => {
-  const { eventId } = req.params
+  const { eventId } = req.params;
 
-  const event = await getEventByIdService({ id: eventId })
+  const event = await getEventByIdService({ id: eventId });
 
   return res.status(200).json({
     status: true,
-    message: 'Event details fetched successfully.',
-    data: event
-  })
-}
+    message: "Event details fetched successfully.",
+    data: event,
+  });
+};
 
 export const updateEventController = async (req: Request, res: Response) => {
   const {
@@ -90,18 +91,18 @@ export const updateEventController = async (req: Request, res: Response) => {
     available_ticket,
     venue_name,
     venue_capacity,
-    address
-  } = req.body
-  
-  const { userId } = res.locals.payload
+    address,
+  } = req.body;
+
+  const { userId } = res.locals.payload;
 
   const imageUrl = Array.isArray(req?.files)
     ? req.files
     : req.files
     ? (req.files as Record<string, Express.Multer.File[]>).image || []
-    : []
+    : [];
 
-  const { eventId } = req.params
+  const { eventId } = req.params;
 
   const event = await updateEventService({
     id: eventId,
@@ -109,34 +110,34 @@ export const updateEventController = async (req: Request, res: Response) => {
     category,
     startDate: new Date(start_date),
     endDate: new Date(end_date),
-    imageUrl, 
+    imageUrl,
     description,
     price: Number(price),
     availableTicket: Number(available_ticket),
     venueName: venue_name,
     venueCapacity: Number(venue_capacity),
     address,
-    userId
-  })
+    userId,
+  });
 
   return res.status(200).json({
     status: true,
-    message: 'Event updated successfully.',
-    data: event
-  })
-}
+    message: "Event updated successfully.",
+    data: event,
+  });
+};
 
 export const deleteEventController = async (req: Request, res: Response) => {
-  const { eventId } = req.params
-  const { userId } = res.locals.payload
+  const { eventId } = req.params;
+  const { userId } = res.locals.payload;
 
   await deleteEventService({
     id: eventId,
-    userId
-  })
+    userId,
+  });
 
   return res.status(200).json({
     status: true,
-    message: 'Event deleted successfully.'
-  })
-}
+    message: "Event deleted successfully.",
+  });
+};
