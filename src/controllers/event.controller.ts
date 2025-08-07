@@ -37,7 +37,7 @@ export const createEventController = async (req: Request, res: Response) => {
     imageUrl,
     description,
     price: Number(price),
-    availableTicket: available_ticket,
+    availableTicket: Number(available_ticket),
     venueName: venue_name,
     venueCapacity: Number(venue_capacity),
     address,
