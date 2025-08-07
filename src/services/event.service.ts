@@ -136,7 +136,8 @@ export const getAllEventService = async ({
 
   if (eventName)
     where.eventName = {
-      contains: eventName
+      contains: eventName,
+      mode: "insensitive"
     }
 
   if (category && Object.values(Category).includes(category as Category)) {
