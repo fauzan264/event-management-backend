@@ -1,10 +1,25 @@
 import { Router } from "express";
 import { jwtVerify } from "../middleware/jwt.verify";
 import { uploaderMulter } from "../middleware/uploader.multer";
-import { updateEventOrganizerController } from "../controllers/event.organizer.controller";
+import {
+  getMyEventsController,
+  updateEventOrganizerController,
+} from "../controllers/event.organizer.controller";
 
-const eventOrganizerRouter = Router()
+const eventOrganizerRouter = Router();
 
-eventOrganizerRouter.put('/:eventOrganizerId', uploaderMulter(['image'], 'memoryStorage').fields([{name: 'banner_url', maxCount: 1}]), jwtVerify, updateEventOrganizerController)
+eventOrganizerRouter.put(
+  "/:eventOrganizerId",
+  uploaderMulter(["image"], "memoryStorage").fields([
+    { name: "banner_url", maxCount: 1 },
+  ]),
+  jwtVerify,
+  updateEventOrganizerController
+);
+eventOrganizerRouter.get(
+  "/:eventOrganizerId/events",
+  jwtVerify,
+  getMyEventsController
+);
 
-export default eventOrganizerRouter
+export default eventOrganizerRouter;
