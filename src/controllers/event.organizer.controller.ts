@@ -49,8 +49,16 @@ export const updateEventOrganizerController = async (
 export const getMyEventsController = async (req: Request, res: Response) => {
   const { eventOrganizerId } = req.params;
   const { userId } = res.locals.payload;
+  let { event_name, category, page, limit } = req.query;
 
-  const events = await getMyEventsService({ eventOrganizerId, userId });
+  const events = await getMyEventsService({
+    eventOrganizerId,
+    eventName: event_name ? String(event_name) : undefined,
+    category: category ? String(category) : undefined,
+    page: page ? Number(page) : undefined,
+    limit: limit ? Number(limit) : undefined,
+    userId,
+  });
 
   return res.status(200).json({
     status: true,

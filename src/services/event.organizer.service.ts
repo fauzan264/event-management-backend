@@ -1,8 +1,9 @@
 import snakecaseKeys from "snakecase-keys";
 import { prisma } from "../db/connection";
-import { Event, EventOrganizer } from "../generated/prisma";
+import { Category, Event, EventOrganizer } from "../generated/prisma";
 import { cloudinaryUpload } from "../lib/cloudinary.upload";
 import { DateTime } from "luxon";
+import { IGetAllEventServiceProps } from "../types/event";
 
 interface IUpdateEventOrganizerServiceProps
   extends Omit<
@@ -108,8 +109,13 @@ export const updateEventOrganizerService = async ({
 
 export const getMyEventsService = async ({
   eventOrganizerId,
+  eventName,
+  category,
+  page,
+  limit,
   userId,
-}: Pick<Event, "eventOrganizerId"> & { userId: string }) => {
+}: Pick<Event, "eventOrganizerId"> &
+  IGetAllEventServiceProps & { userId: string }) => {
   const eventOrganizer = await prisma.eventOrganizer.findUnique({
     where: {
       id: eventOrganizerId,
@@ -125,11 +131,36 @@ export const getMyEventsService = async ({
       isExpose: true,
     };
 
+  const where: any = {
+    eventOrganizerId: eventOrganizer.id,
+    deletedAt: null,
+  };
+
+  if (eventName) {
+    where.eventName = {
+      contains: eventName,
+      mode: "insensitive",
+    };
+  }
+
+  if (category && Object.values(Category).includes(category as Category)) {
+    where.category = category;
+  }
+
+  const pageNumber = page != undefined && page != 0 ? page - 1 : 1;
+  const limitNumber = limit != undefined ? limit : 10;
+  const offset = (pageNumber - 1) * limitNumber;
+
+  const totalData = await prisma.event.count({
+    where: Object.keys(where).length > 0 ? where : undefined,
+  });
+
+  const totalPages = Math.ceil(totalData / limitNumber);
+
   const events = await prisma.event.findMany({
-    where: {
-      eventOrganizerId: eventOrganizer.id,
-      deletedAt: null,
-    },
+    where: Object.keys(where).length > 1 ? where : undefined,
+    skip: offset,
+    take: limitNumber,
     omit: {
       venueId: true,
       eventOrganizerId: true,
@@ -158,7 +189,7 @@ export const getMyEventsService = async ({
       isExpose: true,
     };
 
-  const formattedResponse = events.map((event) => {
+  const eventsData = events.map((event) => {
     return {
       ...event,
       createdAt: DateTime.fromJSDate(event?.createdAt)
@@ -170,5 +201,15 @@ export const getMyEventsService = async ({
     };
   });
 
-  return snakecaseKeys(formattedResponse);
+  const response = {
+    events: eventsData,
+    pagination: {
+      current_page: pageNumber,
+      per_page: limitNumber,
+      total_data: totalData,
+      total_page: totalPages,
+    },
+  };
+
+  return snakecaseKeys(response);
 };
