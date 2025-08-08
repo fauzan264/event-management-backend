@@ -48,6 +48,6 @@ export const getMyEventOrganizerController = async (
   return res.status(200).json({
     status: true,
     message: "Successfully fetched your event organizer data.",
-    res: eventOrganizer,
+    data: eventOrganizer,
   });
 };
