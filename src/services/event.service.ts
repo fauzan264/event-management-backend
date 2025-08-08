@@ -3,6 +3,7 @@ import { prisma } from "../db/connection";
 import { Category, Event, Venue } from "../generated/prisma";
 import { cloudinaryUpload } from "../lib/cloudinary.upload";
 import { DateTime } from "luxon";
+import { IGetAllEventServiceProps } from "../types/event";
 
 interface ICreateEventServiceProps
   extends Pick<
@@ -151,13 +152,6 @@ export const createEventService = async ({
   return snakecaseKeys(formattedResponse, { deep: true });
 };
 
-interface IGetAllEventServiceProps {
-  eventName?: string | undefined;
-  category?: string | undefined;
-  page?: number | undefined;
-  limit?: number | undefined;
-}
-
 export const getAllEventService = async ({
   eventName,
   category,
@@ -168,11 +162,12 @@ export const getAllEventService = async ({
     deletedAt: null,
   };
 
-  if (eventName)
+  if (eventName) {
     where.eventName = {
       contains: eventName,
       mode: "insensitive",
     };
+  }
 
   if (category && Object.values(Category).includes(category as Category)) {
     where.category = category;
