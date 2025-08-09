@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import {
   getMyEventOrganizerService,
+  getMyProfileService,
   updateUserService,
 } from "../services/user.service";
 
@@ -11,6 +12,9 @@ export const updateUserController = async (req: Request, res: Response) => {
   const { id } = req.params;
 
   const { userId } = res.locals.payload;
+
+  
+
 
   const profilePictures = Array.isArray(req?.files)
     ? req.files
@@ -51,3 +55,21 @@ export const getMyEventOrganizerController = async (
     data: eventOrganizer,
   });
 };
+
+export const getMyUserController = async (req: Request, res: Response) => {
+  const { userId } = res.locals.payload;
+
+  const user = await getMyProfileService({ userId });
+
+  res.status(200).json({
+    status: true,
+    message: "Successfully fetched your profile.",
+    data: user,
+  });
+};
+
+
+function useAuthStore(): { token: any; } {
+  throw new Error("Function not implemented.");
+}
+

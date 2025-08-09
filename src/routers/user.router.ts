@@ -2,6 +2,7 @@ import { Router } from "express";
 import { jwtVerify } from "../middleware/jwt.verify";
 import {
   getMyEventOrganizerController,
+  getMyUserController,
   updateUserController,
 } from "../controllers/user.controller";
 import { uploaderMulter } from "../middleware/uploader.multer";
@@ -20,6 +21,11 @@ userRouter.get(
   "/:id/event-organizer",
   jwtVerify,
   getMyEventOrganizerController
+);
+
+userRouter.get("/me",
+  jwtVerify,
+  getMyUserController 
 );
 
 export default userRouter;

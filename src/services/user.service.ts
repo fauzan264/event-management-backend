@@ -89,6 +89,7 @@ export const updateUserService = async ({
   return snakecaseKeys(formattedResponse);
 };
 
+
 export const getMyEventOrganizerService = async ({
   id,
   userId,
@@ -126,4 +127,47 @@ export const getMyEventOrganizerService = async ({
   };
 
   return snakecaseKeys(eventOrganizer);
+};
+
+
+
+export const getMyProfileService = async ({ userId }: { userId: string }) => {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      idCardNumber: true,
+      fullName: true,
+      dateOfBirth: true,
+      email: true,
+      phoneNumber: true,
+      referralCode: true,
+      totalUserPoint: true,
+      userRole: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
+
+  if (!user)
+    throw {
+      message: "User not found.",
+      isExpose: true,
+    };
+
+  const formattedResponse = {
+    ...user,
+    dateOfBirth: user.dateOfBirth
+      ? DateTime.fromJSDate(user.dateOfBirth)
+          .setZone("Asia/Jakarta")
+          .toISODate()
+      : null,
+    createdAt: DateTime.fromJSDate(user.createdAt)
+      .setZone("Asia/Jakarta")
+      .toISO(),
+    updatedAt: DateTime.fromJSDate(user.updatedAt)
+      .setZone("Asia/Jakarta")
+      .toISO(),
+  };
+
+  return snakecaseKeys(formattedResponse);
 };
