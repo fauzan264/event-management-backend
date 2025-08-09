@@ -147,6 +147,10 @@ model Coupon {
   description     String
   availableCoupon Int
 
+ 
+  startDate DateTime @default(now()) @map("start_date")
+  endDate   DateTime? @map("end_date")
+
   purchase_orders PurchaseOrders[]
 
   createdAt DateTime  @default(now()) @map("created_at")
@@ -155,6 +159,7 @@ model Coupon {
 
   @@map("coupon")
 }
+
 
 enum providerType {
   APP
