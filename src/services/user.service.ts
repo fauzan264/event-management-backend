@@ -89,7 +89,6 @@ export const updateUserService = async ({
   return snakecaseKeys(formattedResponse);
 };
 
-
 export const getMyEventOrganizerService = async ({
   id,
   userId,
@@ -128,8 +127,6 @@ export const getMyEventOrganizerService = async ({
 
   return snakecaseKeys(eventOrganizer);
 };
-
-
 
 export const getMyProfileService = async ({ userId }: { userId: string }) => {
   const user = await prisma.user.findUnique({

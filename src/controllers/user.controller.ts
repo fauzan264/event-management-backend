@@ -6,15 +6,12 @@ import {
 } from "../services/user.service";
 
 export const updateUserController = async (req: Request, res: Response) => {
-  const { id_card_number, fullname, date_of_birth, email, phone_number } =
+  const { id_card_number, full_name, date_of_birth, email, phone_number } =
     req.body;
 
   const { id } = req.params;
 
   const { userId } = res.locals.payload;
-
-  
-
 
   const profilePictures = Array.isArray(req?.files)
     ? req.files
@@ -25,7 +22,7 @@ export const updateUserController = async (req: Request, res: Response) => {
   const user = await updateUserService({
     id,
     idCardNumber: id_card_number,
-    fullName: fullname,
+    fullName: full_name,
     dateOfBirth: date_of_birth,
     email,
     phoneNumber: phone_number,
@@ -68,8 +65,6 @@ export const getMyUserController = async (req: Request, res: Response) => {
   });
 };
 
-
-function useAuthStore(): { token: any; } {
+function useAuthStore(): { token: any } {
   throw new Error("Function not implemented.");
 }
-

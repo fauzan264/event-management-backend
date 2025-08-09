@@ -11,7 +11,7 @@ import {
 export const authRegisterController = async (req: Request, res: Response) => {
   const {
     id_card_number,
-    fullname,
+    full_name,
     date_of_birth,
     email,
     password,
@@ -22,7 +22,7 @@ export const authRegisterController = async (req: Request, res: Response) => {
 
   await authRegisterService({
     idCardNumber: id_card_number,
-    fullName: fullname,
+    fullName: full_name,
     dateOfBirth: date_of_birth,
     email: email,
     password: password,
@@ -35,7 +35,7 @@ export const authRegisterController = async (req: Request, res: Response) => {
     success: true,
     message: "Register user successful",
     data: {
-      fullname,
+      full_name,
       email,
     },
   });
@@ -88,12 +88,12 @@ export const authSessionLoginController = async (
 ) => {
   const { userId } = res.locals.payload;
 
-  const { role, fullname } = await authSessionLoginService({ id: userId });
+  const { role, full_name } = await authSessionLoginService({ id: userId });
 
   res.status(200).json({
     success: true,
     message: "Session data retrieved successfully.",
-    data: { id: userId, fullname, role },
+    data: { id: userId, full_name, role },
   });
 };
 
