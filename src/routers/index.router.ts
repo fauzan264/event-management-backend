@@ -8,6 +8,7 @@ import eventOrganizerRouter from "./event.organizer.router";
 import userRouter from "./user.router";
 import orderConfirmationRouter from "./orderconfirmation.router";
 import reviewRouter from "./review.router";
+import couponRouter from "./coupon.router";
 
 const mainRouter = Router();
 
@@ -20,5 +21,6 @@ mainRouter.use("/api/event-organizers", eventOrganizerRouter);
 mainRouter.use("/api/users", userRouter);
 mainRouter.use("/api/purchase-order", orderConfirmationRouter);
 mainRouter.use("/api/event", reviewRouter);
+mainRouter.use("/api/coupon", couponRouter)
 
 export default mainRouter;
