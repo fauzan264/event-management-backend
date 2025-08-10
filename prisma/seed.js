@@ -31,8 +31,8 @@ const event = [
 const coupon = [
   {
         discountValue: 10,
-        provider_type: 'APP',
-        providerId: null,
+        provider_type: 'EVENT ORGANIZER',
+        providerId: "a291a146-9bd0-449a-8cef-753673f51293",
         description: 'Diskon 10% untuk semua event',
         availableCoupon: 100,
   }

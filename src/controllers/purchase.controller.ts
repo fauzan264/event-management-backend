@@ -50,11 +50,13 @@ export const purchaseOrderController = async (req:Request, res:Response) => {
 }
 
 export const getAllOrderController = async (req: Request, res: Response) => {
+  const {userId} = res.locals.payload;
   
   const orders = await getAllOrderService();
 
   const formattedOrders = orders.map((order) => ({
     id: order.id,
+    userId : order.userId,
     fullName: order.fullName,
     email: order.email,
     eventName: order.event?.eventName,
@@ -63,6 +65,8 @@ export const getAllOrderController = async (req: Request, res: Response) => {
     orderStatus: order.orderStatus,
     createdAt: order.createdAt.toISOString(), 
   }));
+  console.log(JSON.stringify(orders, null, 2));
+
 
   res.status(200).json({
     success: true,

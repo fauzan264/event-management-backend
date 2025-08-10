@@ -4,11 +4,15 @@ import { User } from "../generated/prisma";
 import { cloudinaryUpload } from "../lib/cloudinary.upload";
 import snakecaseKeys from "snakecase-keys";
 
-interface IUpdateUserServiceProps extends Pick<User, 'id' | 'idCardNumber' | 'fullName' | 'dateOfBirth' | 'email' | 'phoneNumber' > {
-  profilePictures: Express.Multer.File[]
+interface IUpdateUserServiceProps
+  extends Pick<
+    User,
+    "id" | "idCardNumber" | "fullName" | "dateOfBirth" | "email" | "phoneNumber"
+  > {
+  profilePictures: Express.Multer.File[];
 }
 
-type PhotoProfileUser = { imageUrl: string | undefined | null }
+type PhotoProfileUser = { imageUrl: string | undefined | null };
 
 export const updateUserService = async ({
   id,
@@ -18,29 +22,31 @@ export const updateUserService = async ({
   email,
   phoneNumber,
   profilePictures,
-  userId
+  userId,
 }: IUpdateUserServiceProps & { userId: string }) => {
   const user = await prisma.user.findUnique({
-    where: { id }
-  })
+    where: { id },
+  });
 
   if (user?.id != userId)
-    throw { message: `Access denied. You do not have permission to modify this user.`, isExpose: true }
+    throw {
+      message: `Access denied. You do not have permission to modify this user.`,
+      isExpose: true,
+    };
 
-  if (!user)
-    throw { message: 'User not found', isExpose: true }
-  
-  let updateProfilePicture: PhotoProfileUser[] = []
+  if (!user) throw { message: "User not found", isExpose: true };
+
+  let updateProfilePicture: PhotoProfileUser[] = [];
   if (profilePictures.length) {
-    const uploadProfilePicture = profilePictures.map(async(image) => {
-      const res: any = await cloudinaryUpload(image?.buffer, 'user')
+    const uploadProfilePicture = profilePictures.map(async (image) => {
+      const res: any = await cloudinaryUpload(image?.buffer, "user");
 
-      return { imageUrl: res.secureUrl }
-    })
+      return { imageUrl: res.secureUrl };
+    });
 
-    updateProfilePicture = await Promise.all(uploadProfilePicture)
+    updateProfilePicture = await Promise.all(uploadProfilePicture);
   } else {
-    updateProfilePicture.push({ imageUrl: user?.profilePicture })
+    updateProfilePicture.push({ imageUrl: user?.profilePicture });
   }
 
   const request = {
@@ -49,13 +55,15 @@ export const updateUserService = async ({
     dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : user.dateOfBirth,
     email: email ? email : user.email,
     phoneNumber: phoneNumber ? phoneNumber : user.phoneNumber,
-    profilePicture: updateProfilePicture[0]?.imageUrl ? updateProfilePicture[0]?.imageUrl : user.profilePicture
-  }
+    profilePicture: updateProfilePicture[0]?.imageUrl
+      ? updateProfilePicture[0]?.imageUrl
+      : user.profilePicture,
+  };
 
   const result = await prisma.user.update({
     data: request,
     where: {
-      id
+      id,
     },
     omit: {
       id: true,
@@ -64,15 +72,99 @@ export const updateUserService = async ({
       totalUserPoint: true,
       userRole: true,
       deletedAt: true,
-    }
-  })
+    },
+  });
 
   const formattedResponse = {
     ...result,
-    dateOfBirth: DateTime.fromJSDate(result.dateOfBirth).toFormat('dd-MM-yyyy'),
-    createdAt: DateTime.fromJSDate(result.createdAt).setZone('Asia/Jakarta').toISO(),
-    updatedAt: DateTime.fromJSDate(result.updatedAt).setZone('Asia/Jakarta').toISO()
-  }
+    dateOfBirth: DateTime.fromJSDate(result.dateOfBirth).toFormat("dd-MM-yyyy"),
+    createdAt: DateTime.fromJSDate(result.createdAt)
+      .setZone("Asia/Jakarta")
+      .toISO(),
+    updatedAt: DateTime.fromJSDate(result.updatedAt)
+      .setZone("Asia/Jakarta")
+      .toISO(),
+  };
 
-  return snakecaseKeys(formattedResponse)
-}
+  return snakecaseKeys(formattedResponse);
+};
+
+export const getMyEventOrganizerService = async ({
+  id,
+  userId,
+}: Pick<User, "id"> & { userId: string }) => {
+  if (id != userId)
+    throw {
+      message:
+        "Access denied. You do not have permission to view this event organizer.",
+      isExpose: true,
+    };
+
+  const eventOrganizer = await prisma.eventOrganizer.findUnique({
+    where: {
+      userId: id,
+    },
+    omit: {
+      deletedAt: true,
+    },
+  });
+
+  if (!eventOrganizer)
+    throw {
+      message: "Your account is not registered as an event organizer.",
+      isExpose: true,
+    };
+
+  const formattedResponse = {
+    ...eventOrganizer,
+    createdAt: DateTime.fromJSDate(eventOrganizer.createdAt)
+      .setZone("Asia/Jakarta")
+      .toISO(),
+    updatedAt: DateTime.fromJSDate(eventOrganizer.updatedAt)
+      .setZone("Asia/Jakarta")
+      .toISO(),
+  };
+
+  return snakecaseKeys(eventOrganizer);
+};
+
+export const getMyProfileService = async ({ userId }: { userId: string }) => {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      idCardNumber: true,
+      fullName: true,
+      dateOfBirth: true,
+      email: true,
+      phoneNumber: true,
+      referralCode: true,
+      totalUserPoint: true,
+      userRole: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
+
+  if (!user)
+    throw {
+      message: "User not found.",
+      isExpose: true,
+    };
+
+  const formattedResponse = {
+    ...user,
+    dateOfBirth: user.dateOfBirth
+      ? DateTime.fromJSDate(user.dateOfBirth)
+          .setZone("Asia/Jakarta")
+          .toISODate()
+      : null,
+    createdAt: DateTime.fromJSDate(user.createdAt)
+      .setZone("Asia/Jakarta")
+      .toISO(),
+    updatedAt: DateTime.fromJSDate(user.updatedAt)
+      .setZone("Asia/Jakarta")
+      .toISO(),
+  };
+
+  return snakecaseKeys(formattedResponse);
+};

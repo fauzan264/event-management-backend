@@ -3,13 +3,13 @@ import { cloudinaryUpload } from "../lib/cloudinary.upload";
 import { prisma } from "../db/connection";
 
 type UploadPaymentInput = {
-  id: string;
+  orderId: string;
   imageFile: Express.Multer.File;
 };
 
 
 
-export const uploadPaymentService = async ({ id, imageFile }: UploadPaymentInput) => {
+export const uploadPaymentService = async ({ orderId, imageFile }: UploadPaymentInput) => {
   const uploadResult = await cloudinaryUpload(imageFile.buffer, "payment_proof") as UploadApiResponse;
 
   const imageUrl = uploadResult.secureUrl
@@ -17,7 +17,7 @@ export const uploadPaymentService = async ({ id, imageFile }: UploadPaymentInput
 
 
   const uploadPayment = await prisma.purchaseOrders.update({
-    where: { id },
+    where: { id: orderId },
     data: {
       paymentProof: imageUrl,
       orderStatus: "Waiting for Admin Confirmation",
