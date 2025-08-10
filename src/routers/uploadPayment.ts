@@ -5,7 +5,7 @@ import { jwtVerify } from "../middleware/jwt.verify";
 
 const paymentRouter = Router()
 
-paymentRouter.patch('/:id', uploaderMulter(['image'], 'memoryStorage').single('paymentProof'),jwtVerify, uploadPaymentcontroller);
+paymentRouter.patch('/:orderId', uploaderMulter(['image'], 'memoryStorage').single('paymentProof'),jwtVerify, uploadPaymentcontroller);
 
 export default paymentRouter;
 
