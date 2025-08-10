@@ -202,6 +202,15 @@ model PurchaseOrders {
   @@map("purchase_orders")
 }
 
+enum orderStatus {
+  WAITING_FOR_PAYMENT
+  WAITING_FOR_ADMIN_CONFIRMATION
+  EXPIRED
+  REJECTED
+  DONE
+  CANCELED
+}
+
 model Testimoni {
   id String @id @default(uuid()) @db.VarChar(36)
 
