@@ -1,3 +1,4 @@
+import snakecaseKeys from "snakecase-keys";
 import { prisma } from "../db/connection";
 import { PurchaseOrders } from "../generated/prisma";
 import { DateTime } from "luxon";
@@ -207,6 +208,51 @@ export const getAllOrderService = async () => {
 
   return orders;
 };
+
+export const getOrderbyUserIdService = async (userId: string) => {
+  const orders = await prisma.purchaseOrders.findMany ({
+    where: {
+    userId,
+    deletedAt: null},
+
+    select: {
+    id: true,
+    quantity:true,
+    orderStatus: true,
+    finalPrice: true,
+    createdAt: true,
+    event: {
+      select: {
+        id: true,
+        eventName: true,
+        startDate:true,
+        endDate:true
+      },
+    },
+  },
+    orderBy: {
+      createdAt: "desc",
+      },
+    })
+      const formattedResponse = orders.map((order) => ({
+      ...order,
+      event: {
+        ...order.event,
+        startDate: DateTime.fromJSDate(order.event.startDate)
+          .setZone("Asia/Jakarta")
+          .toISO(),
+        endDate: DateTime.fromJSDate(order.event.endDate)
+          .setZone("Asia/Jakarta")
+          .toISO(),
+      },
+      createdAt: DateTime.fromJSDate(order.createdAt)
+        .setZone("Asia/Jakarta")
+        .toISO(),
+      
+    }));
+    
+      return snakecaseKeys(formattedResponse, { deep: true });
+}
 
 export const getOrderDetailService = async (orderId: string) => {
   const order = await prisma.purchaseOrders.findUnique({

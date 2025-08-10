@@ -1,5 +1,6 @@
 import { Request, Response } from "express"
-import { expiredOrderService, getAllOrderService, getOrderDetailService, purchaseOrderservice } from "../services/purchase.service";
+import { expiredOrderService, getAllOrderService,  getOrderbyUserIdService, getOrderDetailService, purchaseOrderservice } from "../services/purchase.service";
+import { eventNames } from "process";
 
 
 export const purchaseOrderController = async (req:Request, res:Response) => {
@@ -72,6 +73,30 @@ export const getAllOrderController = async (req: Request, res: Response) => {
     data: formattedOrders,
   });
 };
+
+export const getOrderbyUserIdController = async (req: Request, res: Response)  => {
+  const {userId} = res.locals.payload;
+  const orders = await getOrderbyUserIdService (userId)
+
+  const allOrders = orders.map((order) => ({
+    id : order.id,
+    eventName: order.event.event_name,
+    startDate: order.event.start_date,
+    endDate: order.event.end_date,
+    quantity : order.quantity,
+    finalPrice : order.final_price,
+    orderStatus : order.order_status,
+    createdAt : order.created_at
+    
+    
+  }))
+
+  res.status(200).json({
+      success: true,
+      message: "Order by user retrieved successfully",
+      data: allOrders,
+    });
+}
 
 export const getOrderDetailController = async (req: Request, res: Response) => {
     const { orderId } = req.params;
