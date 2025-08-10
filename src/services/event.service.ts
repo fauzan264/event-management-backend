@@ -228,6 +228,7 @@ export const getEventByIdService = async ({ id }: Pick<Event, "id">) => {
         select: {
           id: true,
           companyName: true,
+          bankAccount:true
         },
       },
       venue: {
