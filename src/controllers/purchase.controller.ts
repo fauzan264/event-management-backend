@@ -1,5 +1,5 @@
 import { Request, Response } from "express"
-import { expiredOrderService, getAllOrderService,  getOrderbyUserIdService, getOrderDetailService, purchaseOrderservice } from "../services/purchase.service";
+import {getAllOrderService,  getOrderbyUserIdService, getOrderDetailService, purchaseOrderservice } from "../services/purchase.service";
 import { eventNames } from "process";
 
 
@@ -111,14 +111,4 @@ export const getOrderDetailController = async (req: Request, res: Response) => {
       message: "Order detail retrieved successfully",
       data: orderDetail,
     });
-}
-
-export const expiredOrdersController = async (req:Request, res:Response) => {
-
-    await expiredOrderService();
-
-    res.status(200).json ({
-        success:true,
-        message: 'Purchase Orders Expired'
-    })
 }
