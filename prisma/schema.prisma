@@ -208,6 +208,7 @@ enum orderStatus {
   EXPIRED
   REJECTED
   DONE
+  
   CANCELED
 }
 
