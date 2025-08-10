@@ -51,6 +51,7 @@ export const purchaseOrderController = async (req:Request, res:Response) => {
 
 export const getAllOrderController = async (req: Request, res: Response) => {
   const {userId} = res.locals.payload;
+  
   const orders = await getAllOrderService();
 
   const formattedOrders = orders.map((order) => ({
@@ -77,9 +78,11 @@ export const getAllOrderController = async (req: Request, res: Response) => {
 export const getOrderbyUserIdController = async (req: Request, res: Response)  => {
   const {userId} = res.locals.payload;
   const orders = await getOrderbyUserIdService (userId)
+ 
 
   const allOrders = orders.map((order) => ({
     id : order.id,
+    imageUrl : order.event.image_url,
     eventName: order.event.event_name,
     startDate: order.event.start_date,
     endDate: order.event.end_date,
@@ -94,7 +97,7 @@ export const getOrderbyUserIdController = async (req: Request, res: Response)  =
   res.status(200).json({
       success: true,
       message: "Order by user retrieved successfully",
-      data: allOrders,
+      data: orders,
     });
 }
 

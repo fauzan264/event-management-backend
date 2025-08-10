@@ -224,6 +224,7 @@ export const getOrderbyUserIdService = async (userId: string) => {
     event: {
       select: {
         id: true,
+        imageUrl:true,
         eventName: true,
         startDate:true,
         endDate:true
@@ -267,6 +268,7 @@ export const getOrderDetailService = async (orderId: string) => {
       event: {
         select: {
           eventName: true,
+          
         },
       },
       discount: {
