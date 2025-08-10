@@ -97,7 +97,7 @@ export const getOrderbyUserIdController = async (req: Request, res: Response)  =
   res.status(200).json({
       success: true,
       message: "Order by user retrieved successfully",
-      data: orders,
+      data: allOrders,
     });
 }
 
