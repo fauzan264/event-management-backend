@@ -125,18 +125,20 @@ export const getMyEventOrganizerService = async ({
       .toISO(),
   };
 
-  return snakecaseKeys(eventOrganizer);
+  return snakecaseKeys(formattedResponse);
 };
 
 export const getMyProfileService = async ({ userId }: { userId: string }) => {
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: {
+      id: true,
       idCardNumber: true,
       fullName: true,
       dateOfBirth: true,
       email: true,
       phoneNumber: true,
+      profilePicture: true,
       referralCode: true,
       totalUserPoint: true,
       userRole: true,
