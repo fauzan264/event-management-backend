@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
-import { couponPromoService } from "../services/coupon.service";
+import { couponPromoService, getCouponbyEventService } from "../services/coupon.service";
+import { prisma } from "../db/connection";
 
 export const createPromoController = async (req: Request, res: Response) => {
   const {
@@ -30,3 +31,17 @@ export const createPromoController = async (req: Request, res: Response) => {
     message: "Promo created successfully",
   });
 };
+
+export const getCouponbyEventController = async (req: Request, res: Response) => {
+  const {eventId} = req.params
+
+  const promolist = await getCouponbyEventService({eventId})
+  console.log(promolist)
+  console.log(eventId)
+
+  res.status(201).json({
+    success: true,
+    data: promolist,
+    message: "Promo list retrived successfully",
+  });
+}
