@@ -8,7 +8,7 @@ export const expiryTransactionsJob = async () => {
     where: {
       paymentProof: null,
       expiredAt: { lt: now },
-      orderStatus: "Waiting for payment", 
+      orderStatus: "WAITING_FOR_ADMIN_CONFIRMATION", 
     },
   });
 
@@ -16,7 +16,7 @@ export const expiryTransactionsJob = async () => {
     await prisma.$transaction(async (tx) => {
       await tx.purchaseOrders.update({
         where: { id: order.id },
-        data: { orderStatus: 'Expired' },
+        data: { orderStatus: 'EXPIRED' },
       });
 
       // Return Seat

@@ -307,6 +307,61 @@ export const confirmTransactionService = async ({
   id,
   orderStatus,
 }: Pick<PurchaseOrders, "id" | "orderStatus">) => {
-  // if status REJECTED, balikin point dan vouchernya, kalo menggunakan
-  // kabarin user via email, transaksinya ACCEPT atau REJECT
+  const cancaledOrders = await prisma.purchaseOrders.findMany ({
+    where : {
+      orderStatus : "REJECTED"
+    }
+  });
+  
+for (const order of cancaledOrders) {
+    await prisma.$transaction(async (tx) => {
+      await tx.purchaseOrders.update({
+        where: { id: order.id },
+        data: { orderStatus: 'EXPIRED' },
+      });
+
+      // Return Seat
+      await tx.event.update({
+        where: { id: order.eventId },
+        data: {
+          availableTicket: {
+            increment: order.quantity,
+          },
+        },
+      });
+
+      // Return Coupon Used
+      if (order.discountId) {
+        await tx.coupon.update({
+          where: { id: order.discountId },
+          data: {
+            availableCoupon: {
+              increment: 1,
+            },
+          },
+        });
+      }
+
+      // Return User Point
+      if (order.UserPointsId) {
+        const userPoint = await tx.userPoint.findUnique({
+          where: { id: order.UserPointsId },
+        });
+
+        if (userPoint) {
+          await tx.userPoint.update({
+            where: { id: order.UserPointsId },
+            data: {
+              points: {
+                increment: userPoint.points,
+              },
+            },
+          });
+        }
+      }
+    });
+
+    console.log(`[CRON] Expired and reverted order id: ${order.id}`);
+  }
+  
 };
