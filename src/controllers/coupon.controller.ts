@@ -15,14 +15,14 @@ export const createPromoController = async (req: Request, res: Response) => {
   } = req.body;
 
   const newPromo = await couponPromoService({
-    discountValue,
+    discountValue: Number(discountValue),
     provider_type,
     providerId,
     description,
     availableCoupon,
     eventId,
     startDate,
-    endDate
+    endDate,
   });
 
   res.status(201).json({
