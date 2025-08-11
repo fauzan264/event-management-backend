@@ -22,8 +22,8 @@ export const couponPromoService = async ({
             description,
             availableCoupon,
             eventId,
-            startDate,
-            endDate,
+            startDate : startDate ? new Date(startDate) : undefined,
+            endDate : endDate ? new Date(endDate) : undefined,
         }
         
     })
@@ -39,4 +39,16 @@ export const couponPromoService = async ({
       };
     
       return snakecaseKeys(formattedResponse);
+}
+
+export const getCouponbyEventService = async ({
+    eventId
+} : Pick <Coupon, 'eventId'>) => {
+    const promo = await prisma.coupon.findMany ({
+        where : {
+            eventId
+        }
+    })
+
+    return promo;
 }
