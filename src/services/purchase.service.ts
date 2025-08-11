@@ -1,7 +1,10 @@
 import snakecaseKeys from "snakecase-keys";
 import { prisma } from "../db/connection";
-import { orderStatus, PurchaseOrders } from "../generated/prisma";
+import { PurchaseOrders } from "../generated/prisma";
 import { DateTime } from "luxon";
+import { transporter } from "../lib/transporter";
+import Handlebars from "handlebars";
+import fs from "fs";
 
 export const purchaseOrderservice = async ({
   userId,
@@ -307,33 +310,31 @@ export const confirmTransactionService = async ({
   id,
   orderStatus,
 }: Pick<PurchaseOrders, "id" | "orderStatus">) => {
-  const cancaledOrders = await prisma.purchaseOrders.findMany ({
-    where : {
-      orderStatus : "REJECTED"
-    }
+  const purchaseOrder = await prisma.purchaseOrders.findUnique({
+    where: {
+      id,
+    },
   });
-  
-for (const order of cancaledOrders) {
-    await prisma.$transaction(async (tx) => {
-      await tx.purchaseOrders.update({
-        where: { id: order.id },
-        data: { orderStatus: 'EXPIRED' },
-      });
 
-      // Return Seat
+  if (!purchaseOrder)
+    throw { message: `Purchase Order not found`, isExpose: true };
+
+  const response = await prisma.$transaction(async (tx) => {
+    if (orderStatus == "REJECTED") {
+      // kembalikan seat
       await tx.event.update({
-        where: { id: order.eventId },
+        where: { id: purchaseOrder.eventId },
         data: {
           availableTicket: {
-            increment: order.quantity,
+            increment: purchaseOrder.quantity,
           },
         },
       });
 
-      // Return Coupon Used
-      if (order.discountId) {
+      // apakah menggunakan voucher id
+      if (purchaseOrder.discountId) {
         await tx.coupon.update({
-          where: { id: order.discountId },
+          where: { id: purchaseOrder.discountId },
           data: {
             availableCoupon: {
               increment: 1,
@@ -342,15 +343,15 @@ for (const order of cancaledOrders) {
         });
       }
 
-      // Return User Point
-      if (order.UserPointsId) {
+      // apakah menggunakan point id
+      if (purchaseOrder.UserPointsId) {
         const userPoint = await tx.userPoint.findUnique({
-          where: { id: order.UserPointsId },
+          where: { id: purchaseOrder.UserPointsId },
         });
 
         if (userPoint) {
           await tx.userPoint.update({
-            where: { id: order.UserPointsId },
+            where: { id: purchaseOrder.UserPointsId },
             data: {
               points: {
                 increment: userPoint.points,
@@ -359,9 +360,55 @@ for (const order of cancaledOrders) {
           });
         }
       }
-    });
 
-    console.log(`[CRON] Expired and reverted order id: ${order.id}`);
+      return await prisma.purchaseOrders.update({
+        where: {
+          id: purchaseOrder.id,
+        },
+        data: {
+          orderStatus: "REJECTED",
+        },
+      });
+    } else if (orderStatus == "DONE") {
+      return await prisma.purchaseOrders.update({
+        where: {
+          id: purchaseOrder.id,
+        },
+        data: {
+          orderStatus: "REJECTED",
+        },
+      });
+    }
+  });
+
+  let status: boolean = false;
+  if (orderStatus == "DONE") {
+    status = true;
   }
-  
+
+  const templateHtml = fs.readFileSync(
+    "src/public/template-transaction.html",
+    "utf-8"
+  );
+  const compiledTemplateHtml = Handlebars.compile(templateHtml);
+
+  const resultTemplateHtml = compiledTemplateHtml({
+    fullName: purchaseOrder?.fullName,
+    transactionNumber: purchaseOrder?.id,
+    isAccepted: !status,
+    isRejected: status,
+  });
+
+  await transporter.sendMail({
+    to: purchaseOrder?.email,
+    subject:
+      purchaseOrder?.orderStatus === "DONE"
+        ? "Your Transaction Has Been Accepted"
+        : purchaseOrder?.orderStatus === "REJECTED"
+        ? "Your Transaction Has Been Rejected"
+        : "Transaction Status Update",
+    html: resultTemplateHtml,
+  });
+
+  return response;
 };

@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import {
+  confirmTransactionService,
   getAllOrderService,
   getOrderbyUserIdService,
   getOrderDetailService,
@@ -106,5 +107,24 @@ export const getOrderDetailController = async (req: Request, res: Response) => {
     success: true,
     message: "Order detail retrieved successfully",
     data: orderDetail,
+  });
+};
+
+export const confirmTransactionController = async (
+  req: Request,
+  res: Response
+) => {
+  const { orderId } = req.params;
+  const { order_status } = req.body;
+
+  const transaction = await confirmTransactionService({
+    id: orderId,
+    orderStatus: order_status,
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "Transaction has been successfully confirmed",
+    data: transaction,
   });
 };
