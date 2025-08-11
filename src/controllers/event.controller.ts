@@ -3,6 +3,7 @@ import {
   createEventService,
   deleteEventService,
   getAllEventService,
+  getEventAttendeesService,
   getEventByIdService,
   updateEventService,
 } from "../services/event.service";
@@ -139,5 +140,35 @@ export const deleteEventController = async (req: Request, res: Response) => {
   return res.status(200).json({
     status: true,
     message: "Event deleted successfully.",
+  });
+};
+
+export const getEventAttendeesController = async (
+  req: Request,
+  res: Response
+) => {
+  const { eventId } = req.params;
+
+  const attendees = await getEventAttendeesService({ eventId });
+
+  return res.status(200).json({
+    status: true,
+    message: "Successfully fetched event attendees.",
+    data: attendees,
+  });
+};
+
+export const getEventTransactionsController = async (
+  req: Request,
+  res: Response
+) => {
+  const { eventId } = req.params;
+
+  const attendees = await getEventAttendeesService({ eventId });
+
+  return res.status(200).json({
+    status: true,
+    message: "Successfully fetched event attendees.",
+    data: attendees,
   });
 };
