@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Transaction Status</title>
+  </head>
+  <body
+    style="
+      margin: 0;
+      padding: 20px;
+      background-color: #101829;
+      font-family: Arial, sans-serif;
+      color: #e4e6eb;
+    "
+  >
+    <table
+      align="center"
+      cellpadding="0"
+      cellspacing="0"
+      width="100%"
+      style="
+        max-width: 480px;
+        background-color: #1e2938;
+        border-radius: 8px;
+        padding: 30px;
+      "
+    >
+      <tr>
+        <td style="text-align: center; padding-bottom: 20px">
+          <div
+            style="
+              display: inline-block;
+              background-color: #1549e6;
+              border-radius: 50%;
+              padding: 20px;
+            "
+          >
+            <img
+              src="https://img.icons8.com/ios-filled/50/ffffff/transaction-list.png"
+              alt="Transaction Icon"
+              width="40"
+              height="40"
+              style="display: block"
+            />
+          </div>
+        </td>
+      </tr>
+
+      <tr>
+        <td style="text-align: center; padding-bottom: 10px">
+          <h2 style="margin: 0; color: #e4e6eb">Hello, {{ fullName }} 👋</h2>
+          <p style="margin: 10px 0 20px; font-size: 16px; color: #cbd5e1">
+            Here is the status of your transaction with number
+            <strong>{{ transactionNumber }}</strong>.
+          </p>
+        </td>
+      </tr>
+
+      <!-- If status ACCEPT -->
+      {{#if isAccepted}}
+      <tr>
+        <td style="text-align: center; padding: 15px 0">
+          <span
+            style="
+              display: inline-block;
+              background-color: #0f9d58;
+              color: #e4e6eb;
+              font-weight: bold;
+              font-size: 18px;
+              padding: 10px 20px;
+              border-radius: 6px;
+            "
+            >ACCEPTED</span
+          >
+        </td>
+      </tr>
+      <tr>
+        <td
+          style="
+            text-align: center;
+            font-size: 16px;
+            color: #a3bffa;
+            padding-bottom: 20px;
+          "
+        >
+          Thank you for your transaction. Please check your account for more
+          details.
+        </td>
+      </tr>
+      {{/if}}
+
+      <!-- If status REJECT -->
+      {{#if isRejected}}
+      <tr>
+        <td style="text-align: center; padding: 15px 0">
+          <span
+            style="
+              display: inline-block;
+              background-color: #db4437;
+              color: #e4e6eb;
+              font-weight: bold;
+              font-size: 18px;
+              padding: 10px 20px;
+              border-radius: 6px;
+            "
+            >REJECTED</span
+          >
+        </td>
+      </tr>
+      <tr>
+        <td
+          style="
+            text-align: center;
+            font-size: 16px;
+            color: #fca5a5;
+            padding-bottom: 20px;
+          "
+        >
+          Sorry, your transaction could not be processed. Please contact
+          customer support for further information.
+        </td>
+      </tr>
+      {{/if}}
+
+      <tr>
+        <td
+          style="
+            text-align: center;
+            font-size: 14px;
+            color: #94a3b8;
+            padding-top: 20px;
+          "
+        >
+          If you have any questions, reply to this email or contact our support
+          team.
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
