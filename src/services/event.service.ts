@@ -1,6 +1,6 @@
 import snakecaseKeys from "snakecase-keys";
 import { prisma } from "../db/connection";
-import { Category, Event, Venue } from "../generated/prisma";
+import { Category, Event, PurchaseOrders, Venue } from "../generated/prisma";
 import { cloudinaryUpload } from "../lib/cloudinary.upload";
 import { DateTime } from "luxon";
 import { IGetAllEventServiceProps } from "../types/event";
@@ -228,7 +228,7 @@ export const getEventByIdService = async ({ id }: Pick<Event, "id">) => {
         select: {
           id: true,
           companyName: true,
-          bankAccount:true
+          bankAccount: true,
         },
       },
       venue: {
@@ -436,4 +436,63 @@ export const deleteEventService = async ({
       id,
     },
   });
+};
+
+export const getEventAttendeesService = async ({
+  eventId,
+}: Pick<PurchaseOrders, "eventId">) => {
+  const attendees = await prisma.purchaseOrders.findMany({
+    where: {
+      eventId: eventId,
+      orderStatus: "DONE",
+      deletedAt: null,
+    },
+    distinct: ["userId"],
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  const formattedResponse = attendees.map((attendee) => {
+    return {
+      ...attendee,
+      createdAt: DateTime.fromJSDate(attendee.createdAt)
+        .setZone("Asia/Jakarta")
+        .toISO(),
+      updatedAt: DateTime.fromJSDate(attendee.updatedAt)
+        .setZone("Asia/Jakarta")
+        .toISO(),
+    };
+  });
+
+  return snakecaseKeys(formattedResponse);
+};
+
+export const getEventTransactionsService = async ({
+  eventId,
+}: Pick<PurchaseOrders, "eventId">) => {
+  const attendees = await prisma.purchaseOrders.findMany({
+    where: {
+      eventId: eventId,
+      deletedAt: null,
+    },
+    distinct: ["userId"],
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  const formattedResponse = attendees.map((attendee) => {
+    return {
+      ...attendee,
+      createdAt: DateTime.fromJSDate(attendee.createdAt)
+        .setZone("Asia/Jakarta")
+        .toISO(),
+      updatedAt: DateTime.fromJSDate(attendee.updatedAt)
+        .setZone("Asia/Jakarta")
+        .toISO(),
+    };
+  });
+
+  return snakecaseKeys(formattedResponse);
 };

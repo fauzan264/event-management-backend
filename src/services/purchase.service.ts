@@ -1,6 +1,6 @@
 import snakecaseKeys from "snakecase-keys";
 import { prisma } from "../db/connection";
-import { PurchaseOrders } from "../generated/prisma";
+import { orderStatus, PurchaseOrders } from "../generated/prisma";
 import { DateTime } from "luxon";
 
 export const purchaseOrderservice = async ({
@@ -49,7 +49,6 @@ export const purchaseOrderservice = async ({
     const fullName = user.fullName;
     const email = user.email;
 
-
     // Initial price
     const initPrice = event.price * quantity;
 
@@ -65,7 +64,9 @@ export const purchaseOrderservice = async ({
     // Point Validation
     let userPoint = null;
     if (UserPointsId) {
-      userPoint = await tx.userPoint.findUnique({ where: { id: UserPointsId } });
+      userPoint = await tx.userPoint.findUnique({
+        where: { id: UserPointsId },
+      });
       if (!userPoint || userPoint.expiredAt < new Date()) {
         throw new Error("User point is not valid or has expired.");
       }
@@ -111,18 +112,17 @@ export const purchaseOrderservice = async ({
           },
         },
         discount: {
-          select : {
-            discountValue : true
-          }
+          select: {
+            discountValue: true,
+          },
         },
         user_points: {
-          select : {
-            points : true
-          }
-        }
+          select: {
+            points: true,
+          },
+        },
       },
     });
-
 
     // Update Remaining Ticket
     await tx.event.update({
@@ -148,28 +148,27 @@ export const purchaseOrderservice = async ({
 
     //Decrement Point
     if (orders.UserPointsId) {
-        const userPoint = await tx.userPoint.findUnique({
-          where: { id: orders.UserPointsId }
+      const userPoint = await tx.userPoint.findUnique({
+        where: { id: orders.UserPointsId },
+      });
+      if (userPoint) {
+        const returnPoint = userPoint.points;
+        await tx.userPoint.update({
+          where: { id: orders.UserPointsId },
+          data: {
+            points: {
+              decrement: returnPoint,
+            },
+          },
         });
-        if (userPoint) {
-          const returnPoint = userPoint.points
-          await tx.userPoint.update({
-            where:{ id: orders.UserPointsId },
-            data: {
-              points : {
-                decrement : returnPoint
-              }
-            }
-          })
-        }
       }
+    }
 
     return {
       orders,
     };
   });
 };
-
 
 export const getAllOrderService = async () => {
   const orders = await prisma.purchaseOrders.findMany({
@@ -210,50 +209,50 @@ export const getAllOrderService = async () => {
 };
 
 export const getOrderbyUserIdService = async (userId: string) => {
-  const orders = await prisma.purchaseOrders.findMany ({
+  const orders = await prisma.purchaseOrders.findMany({
     where: {
-    userId,
-    deletedAt: null},
+      userId,
+      deletedAt: null,
+    },
 
     select: {
-    id: true,
-    quantity:true,
-    orderStatus: true,
-    finalPrice: true,
-    createdAt: true,
-    event: {
-      select: {
-        id: true,
-        imageUrl:true,
-        eventName: true,
-        startDate:true,
-        endDate:true
+      id: true,
+      quantity: true,
+      orderStatus: true,
+      finalPrice: true,
+      createdAt: true,
+      event: {
+        select: {
+          id: true,
+          imageUrl: true,
+          eventName: true,
+          startDate: true,
+          endDate: true,
+        },
       },
     },
-  },
     orderBy: {
       createdAt: "desc",
-      },
-    })
-      const formattedResponse = orders.map((order) => ({
-      ...order,
-      event: {
-        ...order.event,
-        startDate: DateTime.fromJSDate(order.event.startDate)
-          .setZone("Asia/Jakarta")
-          .toISO(),
-        endDate: DateTime.fromJSDate(order.event.endDate)
-          .setZone("Asia/Jakarta")
-          .toISO(),
-      },
-      createdAt: DateTime.fromJSDate(order.createdAt)
+    },
+  });
+  const formattedResponse = orders.map((order) => ({
+    ...order,
+    event: {
+      ...order.event,
+      startDate: DateTime.fromJSDate(order.event.startDate)
         .setZone("Asia/Jakarta")
         .toISO(),
-      
-    }));
-    
-      return snakecaseKeys(formattedResponse, { deep: true });
-}
+      endDate: DateTime.fromJSDate(order.event.endDate)
+        .setZone("Asia/Jakarta")
+        .toISO(),
+    },
+    createdAt: DateTime.fromJSDate(order.createdAt)
+      .setZone("Asia/Jakarta")
+      .toISO(),
+  }));
+
+  return snakecaseKeys(formattedResponse, { deep: true });
+};
 
 export const getOrderDetailService = async (orderId: string) => {
   const order = await prisma.purchaseOrders.findUnique({
@@ -268,7 +267,6 @@ export const getOrderDetailService = async (orderId: string) => {
       event: {
         select: {
           eventName: true,
-          
         },
       },
       discount: {
@@ -305,3 +303,10 @@ export const getOrderDetailService = async (orderId: string) => {
   };
 };
 
+export const confirmTransactionService = async ({
+  id,
+  orderStatus,
+}: Pick<PurchaseOrders, "id" | "orderStatus">) => {
+  // if status REJECTED, balikin point dan vouchernya, kalo menggunakan
+  // kabarin user via email, transaksinya ACCEPT atau REJECT
+};
