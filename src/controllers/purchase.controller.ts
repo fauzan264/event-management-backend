@@ -1,33 +1,31 @@
-import { Request, Response } from "express"
-import {getAllOrderService,  getOrderbyUserIdService, getOrderDetailService, purchaseOrderservice } from "../services/purchase.service";
+import { Request, Response } from "express";
+import {
+  getAllOrderService,
+  getOrderbyUserIdService,
+  getOrderDetailService,
+  purchaseOrderservice,
+} from "../services/purchase.service";
 import { eventNames } from "process";
 
+export const purchaseOrderController = async (req: Request, res: Response) => {
+  const { eventId } = req.params;
+  const { userId } = res.locals.payload;
 
-export const purchaseOrderController = async (req:Request, res:Response) => {
-    const { eventId } = req.params;
-    const {userId} = res.locals.payload;
+  const { fullName, email, quantity, discountId, UserPointsId } = req.body;
 
-    const {
-        fullName,
-        email,
-        quantity,
-        discountId,
-        UserPointsId,
-            } = req.body;
+  const newOrder = await purchaseOrderservice({
+    userId,
+    eventId,
+    fullName,
+    email,
+    quantity,
+    discountId,
+    UserPointsId,
+  });
 
-    const newOrder = await purchaseOrderservice ({
-        userId,
-        eventId,
-        fullName,
-        email,
-        quantity,
-        discountId,
-        UserPointsId,
-    })
+  const { orders } = newOrder;
 
-    const { orders } = newOrder;
-
-    const formattedOrder = {
+  const formattedOrder = {
     id: orders?.id,
     user: orders?.user,
     event: orders?.event,
@@ -39,34 +37,32 @@ export const purchaseOrderController = async (req:Request, res:Response) => {
     paymentProof: orders?.paymentProof,
     orderStatus: orders?.orderStatus,
     expiredAt: orders?.expiredAt,
-    };
+  };
 
-
-    res.status(201).json ({
-        success:true,
-        message: 'Purchese Order Successful',
-        data : formattedOrder
-    })
-}
+  res.status(201).json({
+    success: true,
+    message: "Purchese Order Successful",
+    data: formattedOrder,
+  });
+};
 
 export const getAllOrderController = async (req: Request, res: Response) => {
-  const {userId} = res.locals.payload;
-  
+  const { userId } = res.locals.payload;
+
   const orders = await getAllOrderService();
 
   const formattedOrders = orders.map((order) => ({
     id: order.id,
-    userId : order.userId,
+    userId: order.userId,
     fullName: order.fullName,
     email: order.email,
     eventName: order.event?.eventName,
     quantity: order.quantity,
     finalPrice: order.finalPrice,
     orderStatus: order.orderStatus,
-    createdAt: order.createdAt.toISOString(), 
+    createdAt: order.createdAt.toISOString(),
   }));
   console.log(JSON.stringify(orders, null, 2));
-
 
   res.status(200).json({
     success: true,
@@ -75,40 +71,40 @@ export const getAllOrderController = async (req: Request, res: Response) => {
   });
 };
 
-export const getOrderbyUserIdController = async (req: Request, res: Response)  => {
-  const {userId} = res.locals.payload;
-  const orders = await getOrderbyUserIdService (userId)
- 
+export const getOrderbyUserIdController = async (
+  req: Request,
+  res: Response
+) => {
+  const { userId } = res.locals.payload;
+  const orders = await getOrderbyUserIdService(userId);
 
   const allOrders = orders.map((order) => ({
-    id : order.id,
-    imageUrl : order.event.image_url,
+    id: order.id,
+    imageUrl: order.event.image_url,
     eventName: order.event.event_name,
     startDate: order.event.start_date,
     endDate: order.event.end_date,
-    quantity : order.quantity,
-    finalPrice : order.final_price,
-    orderStatus : order.order_status,
-    createdAt : order.created_at
-    
-    
-  }))
+    quantity: order.quantity,
+    finalPrice: order.final_price,
+    orderStatus: order.order_status,
+    createdAt: order.created_at,
+  }));
 
   res.status(200).json({
-      success: true,
-      message: "Order by user retrieved successfully",
-      data: allOrders,
-    });
-}
+    success: true,
+    message: "Order by user retrieved successfully",
+    data: allOrders,
+  });
+};
 
 export const getOrderDetailController = async (req: Request, res: Response) => {
-    const { orderId } = req.params;
+  const { orderId } = req.params;
 
-    const orderDetail = await getOrderDetailService(orderId)
+  const orderDetail = await getOrderDetailService(orderId);
 
-    res.status(200).json({
-      success: true,
-      message: "Order detail retrieved successfully",
-      data: orderDetail,
-    });
-}
+  res.status(200).json({
+    success: true,
+    message: "Order detail retrieved successfully",
+    data: orderDetail,
+  });
+};
