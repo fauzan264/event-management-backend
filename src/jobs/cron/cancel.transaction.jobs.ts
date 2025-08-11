@@ -7,7 +7,7 @@ export const cancelTransactionsJob = async () => {
 
   const expiredTransactions = await prisma.purchaseOrders.findMany({
     where: {
-      orderStatus: "Waiting for Admin Confirmation",
+      orderStatus: "WAITING_FOR_ADMIN_CONFIRMATION",
       updatedAt: {
         lt: threeMonthsAgo,
       },
@@ -19,7 +19,7 @@ export const cancelTransactionsJob = async () => {
   
       await tx.purchaseOrders.updateMany({
         where: { id: order.id },
-        data: { orderStatus: "Canceled" },
+        data: { orderStatus: "CANCELED" },
       });
 
 

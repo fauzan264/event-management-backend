@@ -1,6 +1,7 @@
 import { UploadApiResponse } from "cloudinary";
 import { cloudinaryUpload } from "../lib/cloudinary.upload";
 import { prisma } from "../db/connection";
+import { orderStatus } from "../generated/prisma";
 
 type UploadPaymentInput = {
   orderId: string;
@@ -20,7 +21,7 @@ export const uploadPaymentService = async ({ orderId, imageFile }: UploadPayment
     where: { id: orderId },
     data: {
       paymentProof: imageUrl,
-      orderStatus: "Waiting for Admin Confirmation",
+      orderStatus: orderStatus.WAITING_FOR_ADMIN_CONFIRMATION,
     },
   });
 
