@@ -9,7 +9,7 @@
     style="
       margin: 0;
       padding: 20px;
-      background-color: #064e3b;
+      background-color: #f4f4f4;
       font-family: Arial, sans-serif;
     "
   >
@@ -20,20 +20,13 @@
       width="100%"
       style="
         max-width: 480px;
-        background-color: #334155;
+        background-color: #ffffff;
         border-radius: 8px;
         padding: 30px;
       "
     >
       <tr>
-        <td
-          style="
-            font-size: 20px;
-            font-weight: bold;
-            text-align: left;
-            color: #a7f3d0;
-          "
-        >
+        <td style="font-size: 20px; font-weight: bold; text-align: left">
           Email
         </td>
       </tr>
@@ -43,13 +36,13 @@
           <div
             style="
               display: inline-block;
-              background-color: #fbbf24;
+              background-color: #007bff;
               border-radius: 50%;
               padding: 20px;
             "
           >
             <img
-              src="https://img.icons8.com/ios-filled/50/000000/lock--v1.png"
+              src="https://img.icons8.com/ios-filled/50/ffffff/lock--v1.png"
               alt="Lock Icon"
               width="40"
               height="40"
@@ -61,11 +54,11 @@
 
       <tr>
         <td style="text-align: center; padding-top: 10px">
-          <h2 style="margin: 0; color: #a7f3d0">Hi, {{ fullname }} 👋</h2>
-          <p style="margin: 10px 0 0; font-size: 16px; color: #a7f3d0">
+          <h2 style="margin: 0">Hi, {{ fullname }} 👋</h2>
+          <p style="margin: 10px 0 0; font-size: 16px; color: #333">
             We received a request to reset your password.
           </p>
-          <p style="margin: 5px 0 20px; font-size: 16px; color: #a7f3d0">
+          <p style="margin: 5px 0 20px; font-size: 16px; color: #333">
             Click the button below to continue.
           </p>
         </td>
@@ -76,14 +69,13 @@
           <a
             href="{{ resetLinkPassword }}"
             style="
-              background-color: #fbbf24;
-              color: #064e3b;
+              background-color: #007bff;
+              color: white;
               text-decoration: none;
               padding: 12px 24px;
               border-radius: 6px;
               display: inline-block;
               font-size: 16px;
-              font-weight: bold;
             "
           >
             Reset Password
@@ -97,13 +89,12 @@
             text-align: center;
             padding-top: 20px;
             font-size: 14px;
-            color: #a7f3d0;
+            color: #666;
           "
         >
-          If you didn't request this, you can safely ignore this email.
+          If you didn’t request this, you can safely ignore this email.
         </td>
       </tr>
     </table>
   </body>
 </html>
-`
