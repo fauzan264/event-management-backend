@@ -68,39 +68,8 @@ export const authRegisterService = async ({
 
       await jwtSign({ userId: createdUser?.id }, process.env.JWT_SECRET_KEY!, {
         algorithm: "HS256",
+        expiresIn: "1h",
       });
-
-      if (referral) {
-        const now = DateTime.now().setZone("Asia/Jakarta");
-        const threeMonthLater = now.plus({ months: 3 });
-
-        await tx.user.update({
-          data: {
-            totalUserPoint: referral?.totalUserPoint,
-          },
-          where: {
-            id: referral?.id,
-          },
-        });
-
-        await tx.userPoint.create({
-          data: {
-            userId: referral?.id,
-            points: rewardPoint,
-            expiredAt: threeMonthLater.toISO()!,
-          },
-        });
-      }
-
-      if (userRole == UserRole.EVENT_ORGANIZER) {
-        await tx.eventOrganizer.create({
-          data: {
-            companyName: `${fullName} company`,
-            email: email,
-            userId: createdUser.id,
-          },
-        });
-      }
     });
   } catch (error: any) {
     if (error?.code === "P2002") {
